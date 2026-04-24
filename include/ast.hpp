@@ -37,3 +37,21 @@ struct ASTNode
         }
     }
 };
+
+// Alimenta a funcao gerarArvore()
+struct ProducaoAplicada
+{
+    std::string nao_terminal; // Nao-terminal expandido // "operacao"
+    std::vector<std::string> producao; // Regra aplicada // ["OPERADOR"]
+};
+
+struct Derivacao
+{
+    // Sequencia de producoes aplicadas durante o parsing LL(1)
+    // Representa a "estrutura de derivacao"
+    std::vector<ProducaoAplicada> producoes;
+
+    // AST pre-construida atraves das acoes semanticas em RPN
+    // Sera extraida por gerarArvore() conforme a secao 7.4
+    ASTNode *raiz = nullptr;
+};

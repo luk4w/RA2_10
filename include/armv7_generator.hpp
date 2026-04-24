@@ -3,13 +3,14 @@
 
 #include <string>
 #include <vector>
+#include "ast.hpp"
 
 /**
- * @brief Gera codigo assembly ARMv7 a partir de tokens em Notação Polonesa Reversa (RPN)
- * @param tokens Vetor contendo os tokens da expressão (números, variáveis, operadores)
- * @param codigoAssembly Referência para string onde o código assembly gerado será armazenado
- * @note Todos os valores são manipulados como double (64-bit floating-point) R10 mantem o ponteiro de topo da pilha de historico e no final o probrama trava com "_halt: B _halt" para evitar comportamento indefinido
+ * @brief Gera codigo assembly ARMv7 a partir da arvore sintatica (AST)
+ * @param arvore Raiz da AST produzida por gerarArvore()
+ * @param codigoAssembly Referencia para string onde o codigo assembly sera armazenado
+ * @note Todos os valores sao manipulados como double (64-bit floating-point) R10 mantem o ponteiro de topo da pilha de historico (RES).
  */
-void gerarAssembly(const std::vector<std::string>& _tokens_, std::string& codigoAssembly);
+void gerarAssembly(ASTNode *arvore, std::string &codigoAssembly);
 
 #endif

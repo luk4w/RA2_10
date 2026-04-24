@@ -1,5 +1,7 @@
+// Integrantes do grupo (ordem alfabetica):
 // Lucas Franco de Mello - luk4w
-// Nome do grupo no Canivelas: RA2 10
+//
+// Nome do grupo no Canvas: RA2 10
 
 #include "parser.hpp"
 #include <iostream>
@@ -64,10 +66,18 @@ static string resolverOpcode(const string &op)
 //  cria o No com filhos corretos e empilha o resultado
 //
 // Ao final de cada expressao aninhada (PARENTESE_DIR), o topo de pilhaOp contem o No raiz daquela subexpressao, que vira operando da expressao pai.
-ASTNode *parsear(const vector<TokenData> &tokens,
-                 const map<string, map<string, vector<string>>> &tabela_ll1)
+//
+// Esta funcao retorna uma estrutura Derivacao contendo:
+//   - producoes: lista ordenada de producoes aplicadas
+//   - raiz: AST pre-construida pelas acoes semanticas em RPN
+// A raiz e posteriormente extraida por gerarArvore()
+Derivacao parsear(const vector<TokenData> &tokens,
+                  const map<string, map<string, vector<string>>> &tabela_ll1)
 {
-    // Pilha LL(1) de controle sintatico 
+    // Estrutura de derivacao (saida da funcao)
+    Derivacao derivacao;
+
+    // Pilha LL(1) de controle sintatico
     stack<string> pilhaLL;
     pilhaLL.push("$");
     pilhaLL.push("programa");
@@ -359,6 +369,9 @@ ASTNode *parsear(const vector<TokenData> &tokens,
 
             const vector<string> &producao = linhaTabela.at(terminalAtual);
 
+            // Registra a producao aplicada na estrutura de derivacao
+            derivacao.producoes.push_back({topo, producao});
+
             // Empilha em ordem reversa (processa da esquerda pra direita)
             for (int i = static_cast<int>(producao.size()) - 1; i >= 0; --i)
                 pilhaLL.push(producao[i]);
@@ -372,5 +385,15 @@ ASTNode *parsear(const vector<TokenData> &tokens,
             raiz->filhos.push_back(no);
     }
 
-    return raiz;
+    derivacao.raiz = raiz;
+    return derivacao;
+}
+
+// Extrai a arvore sintatica da estrutura de derivacao produzida por parsear()
+ASTNode *gerarArvore(const Derivacao &derivacao)
+{
+    if (derivacao.raiz == nullptr)
+        throw runtime_error("gerarArvore: derivacao sem raiz (parsing falhou)");
+
+    return derivacao.raiz;
 }

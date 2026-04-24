@@ -1,4 +1,5 @@
-// Lucas Franco de Mello - Luk4w
+// Integrantes do grupo (ordem alfabetica):
+// Lucas Franco de Mello - luk4w
 // Nome do grupo no Canvas: RA2 10
 
 #include <iostream>
@@ -19,19 +20,8 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    // Carregar a gramatica
+    // Carregar a gramatica // definir regras de producao, calcular FIRST/FOLLOW e a tabela LL(1)
     construirGramatica();
-
-    // imprimir a tabela LL1 no formato de matriz M[nao_terminal, terminal] = regra de prod
-    // cout << "--- TABELA DE PARSING LL(1) ---\n";
-    // for (const auto& [nao_terminal, transicoes] : tabela_ll1) {
-    //     for (const auto& [terminal, regra] : transicoes) {
-    //         cout << "M[" << nao_terminal << ", " << terminal << "] = { ";
-    //         for (const string& s : regra) cout << s << " ";
-    //         cout << "}\n";
-    //     }
-    // }
-    // cout << "\n\n";
 
     // Validacao do numero de argumentos
     if (argc != 2)
@@ -64,7 +54,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Extrair os tokens de cada linha individualmente
+    // Extrair os tokens de cada linha individualmente 
     vector<string> tokens_linha;
     try
     {
@@ -109,18 +99,50 @@ int main(int argc, char *argv[])
 
     executarTestesLexicos();
 
-    ASTNode* raiz = nullptr;
+    // Produz a estrutura de derivacao
+    Derivacao derivacao;
+    ASTNode *arvore = nullptr;
     try
     {
-        // Executar o analisador sintático LL(1)
-        raiz = parsear(vtokens, tabela_ll1);
-        if (raiz) {
-        exportarAST(raiz, "ast_saida.json");
-    }
+        derivacao = parsear(vtokens, tabela_ll1);
+
+        // Transforma a derivacao em arvore sintatica estruturada
+        arvore = gerarArvore(derivacao);
+
+        if (arvore)
+        {
+            // Exporta a AST em JSON
+            exportarAST(arvore, "ast_saida.json");
+        }
     }
     catch (const std::exception &e)
     {
         cerr << e.what() << "\n";
+        return 1;
+    }
+
+    // Geracao de codigo Assembly ARMv7 para Cpulator-ARMv7 DEC1-SOC(v16.1)
+    // a partir da AST
+    try
+    {
+        std::string codigoAssembly;
+        gerarAssembly(arvore, codigoAssembly);
+
+        ofstream asmFile("saida.s");
+        if (asmFile.is_open())
+        {
+            asmFile << codigoAssembly;
+            asmFile.close();
+            cout << "Assembly gerado com sucesso em: saida.s\n";
+        }
+        else
+        {
+            cerr << "Erro ao criar arquivo de saida Assembly.\n";
+        }
+    }
+    catch (const std::exception &e)
+    {
+        cerr << "Erro na geracao do Assembly: " << e.what() << "\n";
         return 1;
     }
 
