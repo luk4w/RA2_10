@@ -5,7 +5,7 @@
 #include <string>
 #include <utility> // Para std::pair
 
-int gerarAssembly(const std::vector<std::string> &_tokens_, std::string &codigoAssembly)
+void gerarAssembly(const std::vector<std::string> &_tokens_, std::string &codigoAssembly)
 {
     std::stringstream ss;
     std::map<std::string, std::string> literais;
@@ -265,5 +265,4 @@ int gerarAssembly(const std::vector<std::string> &_tokens_, std::string &codigoA
     ss << "    B _interactive_loop     @ Watchdog do loop\n";
 
     codigoAssembly = ss.str();
-    return 0;
 }
