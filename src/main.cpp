@@ -9,13 +9,27 @@
 #include "cli_controller.hpp"
 #include "fsm_scanner.hpp"
 #include "armv7_generator.hpp"
-#include "parser.hpp"
 #include "tokens.hpp"
+#include "gramatica.hpp"
 
 using namespace std;
 
 int main(int argc, char *argv[])
 {
+    // Carregar a gramatica
+    construirGramatica();
+
+    // imprimir a tabela LL1 no formato de matriz M[nao_terminal, terminal] = regra de prod
+    cout << "--- TABELA DE PARSING LL(1) ---\n";
+    for (const auto& [nao_terminal, transicoes] : tabela_ll1) {
+        for (const auto& [terminal, regra] : transicoes) {
+            cout << "M[" << nao_terminal << ", " << terminal << "] = { ";
+            for (const string& s : regra) cout << s << " ";
+            cout << "}\n";
+        }
+    }
+    cout << "\n\n";
+
     // Validacao do numero de argumentos
     if (argc != 2)
     {
@@ -78,10 +92,11 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    std::vector<TokenData> vtokens;
     try
     {
         // Ler o arquivo tokens.txt salvo
-        std::vector<TokenData> vtokens = lerTokens("tokens.txt");
+        vtokens = lerTokens("tokens.txt");
         // for (const auto& t : vtokens) {
         //     std::cout << "Tipo: " << t.tipo << " | Valor: [" << t.valor << "]\n";
         // }
@@ -91,6 +106,8 @@ int main(int argc, char *argv[])
         cerr << "Falha ao ler arquivo de tokens" << endl;
         return 1;
     }
+
+
 
     string output;
     try

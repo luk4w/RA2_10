@@ -16,8 +16,9 @@ set(SOURCES
     src/cli_controller.cpp
     src/fsm_scanner.cpp
     src/armv7_generator.cpp
-    src/parser.cpp
+    src/gramatica.cpp
 )
 
 # Define o nome do executável e o(s) arquivo(s) fonte
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES}
+    src/gramatica.cpp)

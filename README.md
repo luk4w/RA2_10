@@ -57,7 +57,7 @@ Para garantir que o Analisador Sintático opere de forma determinística, a gram
 ### Dicionário de Símbolos
 
 **Terminais (Tokens):**
-`PARENTESE_ESQ`, `PARENTESE_DIR`, `START`, `END`, `NUMERO`, `ID`, `OPERADOR`, `OPERADOR_RELACIONAL`, `IFELSE`, `WHILE`
+`PARENTESE_ESQ`, `PARENTESE_DIR`, `START`, `END`, `NUMERO`, `IDENTIFICADOR`, `OPERADOR`, `OPERADOR_RELACIONAL`, `IFELSE`, `WHILE`
 
 **Não-Terminais (Variáveis da AST):**
 `programa`, `sequencia_execucao`, `avaliacao_sequencia`, `expressao_aninhada`, `operando`, `corpo_expressao`, `complemento_expressao`, `operacao`
@@ -66,52 +66,87 @@ Para garantir que o Analisador Sintático opere de forma determinística, a gram
 
 O cálculo teórico exigido para provar a ausência de conflitos ambíguos na árvore sintática:
 
-**FIRST**:
+### Conjuntos FIRST
 * **FIRST(programa)** = { `PARENTESE_ESQ` }
 * **FIRST(sequencia_execucao)** = { `PARENTESE_ESQ` }
-* **FIRST(avaliacao_sequencia)** = { `END`, `NUMERO`, `PARENTESE_ESQ`, `ID` }
+* **FIRST(avaliacao_sequencia)** = { `END`, `IDENTIFICADOR`, `NUMERO`, `PARENTESE_ESQ` }
 * **FIRST(expressao_aninhada)** = { `PARENTESE_ESQ` }
 * **FIRST(operando)** = { `NUMERO`, `PARENTESE_ESQ` }
-* **FIRST(corpo_expressao)** = { `NUMERO`, `PARENTESE_ESQ`, `ID` }
-* **FIRST(complemento_expressao)** = { `NUMERO`, `PARENTESE_ESQ`, `ID` }
-* **FIRST(operacao)** = { `OPERADOR`, `OPERADOR_RELACIONAL`, `NUMERO`, `PARENTESE_ESQ`, `WHILE` }
+* **FIRST(corpo_expressao)** = { `IDENTIFICADOR`, `NUMERO`, `PARENTESE_ESQ` }
+* **FIRST(complemento_expressao)** = { `IDENTIFICADOR`, `NUMERO`, `PARENTESE_ESQ`, `RES` }
+* **FIRST(operacao)** = { `NUMERO`, `OPERADOR`, `OPERADOR_RELACIONAL`, `PARENTESE_ESQ`, `WHILE` }
 
-**FOLLOW**:
+### Conjuntos FOLLOW
 * **FOLLOW(programa)** = { `$` }
 * **FOLLOW(sequencia_execucao)** = { `$` }
 * **FOLLOW(avaliacao_sequencia)** = { `$` }
-* **FOLLOW(expressao_aninhada)** = { `NUMERO`, `PARENTESE_ESQ`, `ID`, `OPERADOR`, `OPERADOR_RELACIONAL`, `WHILE`, `IFELSE` }
-* **FOLLOW(operando)** = { `NUMERO`, `PARENTESE_ESQ`, `ID`, `OPERADOR`, `OPERADOR_RELACIONAL`, `WHILE`, `IFELSE` }
+* **FOLLOW(expressao_aninhada)** = { `IDENTIFICADOR`, `IFELSE`, `NUMERO`, `OPERADOR`, `OPERADOR_RELACIONAL`, `PARENTESE_ESQ`, `RES`, `WHILE` }
+* **FOLLOW(operando)** = { `IDENTIFICADOR`, `IFELSE`, `NUMERO`, `OPERADOR`, `OPERADOR_RELACIONAL`, `PARENTESE_ESQ`, `RES`, `WHILE` }
 * **FOLLOW(corpo_expressao)** = { `PARENTESE_DIR` }
 * **FOLLOW(complemento_expressao)** = { `PARENTESE_DIR` }
 * **FOLLOW(operacao)** = { `PARENTESE_DIR` }
 
 ### Tabela de Parsing LL(1)
 
-A matriz de decisão para a implementação das funções recursivas do compilador. Os números indicam qual "Regra de Produção" acima deve ser invocada. Células em branco indicam *Syntax Error*.
+A tabela LL(1) serve para guiar o parser preditivo descendente na determinação de qual regra gramatical (produção) deve ser aplicada a seguir, sem precisar de backtracking.
 
-| Não-Terminal | `(` | `)` | `START` | `END` | `NUMERO` | `ID` | `OPERADOR` | `OPERADOR_RELACIONAL` | `IFELSE` | `WHILE` | `$` |
+As células em branco indicam *Syntax Error*.
+
+#### Formato compacto
+`M[Não-terminal, Terminal] = Produção`
+```
+M[avaliacao_sequencia, END] = { END PARENTESE_DIR }
+M[avaliacao_sequencia, IDENTIFICADOR] = { corpo_expressao PARENTESE_DIR sequencia_execucao }
+M[avaliacao_sequencia, NUMERO] = { corpo_expressao PARENTESE_DIR sequencia_execucao }
+M[avaliacao_sequencia, PARENTESE_ESQ] = { corpo_expressao PARENTESE_DIR sequencia_execucao }
+M[complemento_expressao, IDENTIFICADOR] = { IDENTIFICADOR }
+M[complemento_expressao, NUMERO] = { operando operacao }
+M[complemento_expressao, PARENTESE_ESQ] = { operando operacao }
+M[complemento_expressao, RES] = { RES }
+M[corpo_expressao, IDENTIFICADOR] = { IDENTIFICADOR }
+M[corpo_expressao, NUMERO] = { operando complemento_expressao }
+M[corpo_expressao, PARENTESE_ESQ] = { operando complemento_expressao }
+M[expressao_aninhada, PARENTESE_ESQ] = { PARENTESE_ESQ corpo_expressao PARENTESE_DIR }
+M[operacao, NUMERO] = { operando IFELSE }
+M[operacao, OPERADOR] = { OPERADOR }
+M[operacao, OPERADOR_RELACIONAL] = { OPERADOR_RELACIONAL }
+M[operacao, PARENTESE_ESQ] = { operando IFELSE }
+M[operacao, WHILE] = { WHILE }
+M[operando, NUMERO] = { NUMERO }
+M[operando, PARENTESE_ESQ] = { expressao_aninhada }
+M[programa, PARENTESE_ESQ] = { PARENTESE_ESQ START PARENTESE_DIR sequencia_execucao }
+M[sequencia_execucao, PARENTESE_ESQ] = { PARENTESE_ESQ avaliacao_sequencia }
+```
+ 
+#### Formato tabular
+ 
+| Não-Terminal | `(` | `)` | `START` | `END` | `NUMERO` | `ID` | `OPERADOR` | `OP_REL` | `IFELSE` | `WHILE` | `RES` |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **programa** | 1 | | | | | | | | | | |
 | **sequencia_execucao** | 2 | | | | | | | | | | |
-| **avaliacao_sequencia**| 3b | | | 3a | 3b | 3b | | | | | |
+| **avaliacao_sequencia** | 3b | | | 3a | 3b | 3b | | | | | |
 | **expressao_aninhada** | 4 | | | | | | | | | | |
 | **operando** | 5b | | | | 5a | | | | | | |
 | **corpo_expressao** | 6a | | | | 6a | 6b | | | | | |
-| **comp_expressao** | 7a | | | | 7a | 7b | | | | | |
+| **complemento_expressao** | 7a | | | | 7a | 7b | | | | | 7c |
 | **operacao** | 8c | | | | 8c | | 8a | 8b | | 8d | |
-
-**Legenda das ramificações:**
-* **3a:** `END PARENTESE_DIR`
-* **3b:** `corpo_expressao PARENTESE_DIR sequencia_execucao`
-* **5a:** `NUMERO`
-* **5b:** `expressao_aninhada`
-* **6a:** `operando complemento_expressao`
-* **6b:** `ID`
-* **7a:** `operando operacao`
-* **7b:** `ID`
-* **8a:** `OPERADOR`
-* **8b:** `OPERADOR_RELACIONAL`
-* **8c:** `operando IFELSE`
-* **8d:** `WHILE`
-
+ 
+#### Legenda
+| Código | Produção |
+| :--- | :--- |
+| **1** | `PARENTESE_ESQ START PARENTESE_DIR sequencia_execucao` |
+| **2** | `PARENTESE_ESQ avaliacao_sequencia` |
+| **3a** | `END PARENTESE_DIR` |
+| **3b** | `corpo_expressao PARENTESE_DIR sequencia_execucao` |
+| **4** | `PARENTESE_ESQ corpo_expressao PARENTESE_DIR` |
+| **5a** | `NUMERO` |
+| **5b** | `expressao_aninhada` |
+| **6a** | `operando complemento_expressao` |
+| **6b** | `IDENTIFICADOR` |
+| **7a** | `operando operacao` |
+| **7b** | `IDENTIFICADOR` |
+| **7c** | `RES` |
+| **8a** | `OPERADOR` |
+| **8b** | `OPERADOR_RELACIONAL` |
+| **8c** | `operando IFELSE` |
+| **8d** | `WHILE` |
