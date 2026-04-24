@@ -9,6 +9,8 @@
 #include "cli_controller.hpp"
 #include "fsm_scanner.hpp"
 #include "armv7_generator.hpp"
+#include "parser.hpp"
+#include "tokens.hpp" 
 
 using namespace std;
 
@@ -35,12 +37,7 @@ int main(int argc, char *argv[])
     vector<string> buffer_linhas;
 
     // Extrair os dados do arquivo e armazenar no buffer
-    int status = lerArquivo(arq, buffer_linhas);
-    if (status != 0)
-    {
-        cerr << "Falha ao ler o arquivo " << arq << "\n";
-        return status;
-    }
+    lerArquivo(arq, buffer_linhas);
 
     // Extrair os tokens de cada linha individualmente
     vector<string> tokens_linha;
@@ -61,6 +58,13 @@ int main(int argc, char *argv[])
         tokenFile << token << "\n";
     }
     tokenFile.close();
+
+    // Ler o arquivo tokens.txt salvo
+    std::vector<TokenData> vtokens = lerTokens("tokens.txt");
+
+    // for (const auto& t : vtokens) {
+    //     std::cout << "Tipo: " << t.tipo << " | Valor: [" << t.valor << "]\n";
+    // }
 
     string output;
     if (gerarAssembly(tokens_linha, output))

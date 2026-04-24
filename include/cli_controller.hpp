@@ -3,13 +3,19 @@
 
 #include <vector>
 #include <string>
+#include "tokens.hpp"
 
 /**
  * @brief Função responsável por ler um arquivo de texto e armazenar as linhas em um vetor de strings.
  * @param nomeArquivo O nome do arquivo a ser lido.
  * @param linhas Referencia para o vetor destino das strings extraidas do arquivo
- * @return Retorna 0 em caso de sucesso, ou 1 em caso de erro.
  */
-int lerArquivo(std::string nomeArquivo, std::vector<std::string> &linhas);
+void lerArquivo(std::string nomeArquivo, std::vector<std::string> &linhas);
+
+/**
+* @brief Função responsavel por ler o arquivo de tokens da fase 1
+* @param nomeArquivo O nome do arquivo a ser lido.
+*/
+std::vector<TokenData> lerTokens(std::string nomeArquivo);
 
 #endif

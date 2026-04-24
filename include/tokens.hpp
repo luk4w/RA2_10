@@ -13,6 +13,12 @@ enum class TipoToken
     OPERADOR_RELACIONAL = 6
 };
 
+// Estrutura para facilitar a manipulação posterior
+struct TokenData {
+    std::string tipo;
+    std::string valor;
+};
+
 inline const std::string T_NUMERO = std::to_string(static_cast<int>(TipoToken::NUMERO));
 inline const std::string T_IDENTIFICADOR = std::to_string(static_cast<int>(TipoToken::IDENTIFICADOR));
 inline const std::string T_OPERADOR = std::to_string(static_cast<int>(TipoToken::OPERADOR));

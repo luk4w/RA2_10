@@ -1,8 +1,9 @@
 #include <cli_controller.hpp>
 #include <iostream>
 #include <fstream>
+#include <stdexcept>
 
-int lerArquivo(std::string nomeArquivo, std::vector<std::string> &linhas)
+void lerArquivo(std::string nomeArquivo, std::vector<std::string> &linhas)
 {
     // input file stream
     std::ifstream arquivo(nomeArquivo);
@@ -10,8 +11,7 @@ int lerArquivo(std::string nomeArquivo, std::vector<std::string> &linhas)
     // Verificar se o arquivo foi aberto com sucesso
     if (!arquivo.is_open())
     {
-        std::cerr << "Nao foi possivel abrir o arquivo " << nomeArquivo << "\n";
-        return 1;
+        throw std::runtime_error("Nao foi possivel abrir o arquivo " + nomeArquivo);
     }
     std::string buffer_linha;
 
@@ -30,17 +30,41 @@ int lerArquivo(std::string nomeArquivo, std::vector<std::string> &linhas)
     // Verificar se existem linhas depois de ler o arquivo
     if (linhas.empty())
     {
-        std::cerr << "O arquivo carregado esta vazio\n";
-        return 1;
+        throw std::runtime_error("O arquivo carregado esta vazio\n");
     }
     else if (linhas.size() < 10)
     {
-        std::cerr << "O arquivo carregado possui menos de 10 linhas. Linhas carregadas: " << linhas.size() << "\n";
-        return 1;
+        throw std::runtime_error("O arquivo carregado possui menos de 10 linhas. Linhas carregadas: " + std::to_string(linhas.size()));
     }
     else
     {
         std::cout << "Sucesso " << linhas.size() << " linhas carregadas.\n";
-        return 0;
     }
+};
+
+std::vector<TokenData> lerTokens(std::string nomeArquivo)
+{
+    std::ifstream arquivo(nomeArquivo);
+    // Verificar se o arquivo foi aberto com sucesso
+    if (!arquivo.is_open())
+    {
+        throw std::runtime_error("Nao foi possivel abrir o arquivo: " + nomeArquivo);
+    }
+
+
+    std::vector<TokenData> tokens_estruturados;
+    std::string linha;
+
+    // Extrair o tipo e o valor do token e transformar num vetor estruturado
+    while (std::getline(arquivo, linha))
+    {
+        if (linha.empty()) continue;
+
+        // splitToken retorna std::pair<std::string, std::string> 
+        auto [tipo, valor] = splitToken(linha); 
+        
+        tokens_estruturados.push_back({tipo, valor});
+    }
+
+    return tokens_estruturados;
 };
