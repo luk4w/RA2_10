@@ -19,36 +19,51 @@ static string decodificarToken(const TokenData &token, string &valorReal)
     }
 
     int tipoInt = stoi(token.tipo);
-    valorReal   = token.valor;
+    valorReal = token.valor;
 
     switch (tipoInt)
     {
-    case 0: return "NUMERO";
-    case 1: return "IDENTIFICADOR";
-    case 2: return "OPERADOR";
-    case 3: return valorReal;          // START, END, WHILE, IFELSE, RES
-    case 4: return "PARENTESE_ESQ";
-    case 5: return "PARENTESE_DIR";
-    case 6: return "OPERADOR_RELACIONAL";
-    default: return "";
+    case 0:
+        return "NUMERO";
+    case 1:
+        return "IDENTIFICADOR";
+    case 2:
+        return "OPERADOR";
+    case 3:
+        return valorReal; // START, END, WHILE, IFELSE, RES
+    case 4:
+        return "PARENTESE_ESQ";
+    case 5:
+        return "PARENTESE_DIR";
+    case 6:
+        return "OPERADOR_RELACIONAL";
+    default:
+        return "";
     }
 }
 
 // Opcodes ARMv7 VFP para cada operador aritmético
 static string resolverOpcode(const string &op)
 {
-    if (op == "+") return "VADD.F64";
-    if (op == "-") return "VSUB.F64";
-    if (op == "*") return "VMUL.F64";
-    if (op == "/") return "DIV_INT";
-    if (op == "|") return "VDIV.F64";
-    if (op == "%") return "MOD_INT";
-    if (op == "^") return "POW";
+    if (op == "+")
+        return "VADD.F64";
+    if (op == "-")
+        return "VSUB.F64";
+    if (op == "*")
+        return "VMUL.F64";
+    if (op == "/")
+        return "DIV_INT";
+    if (op == "|")
+        return "VDIV.F64";
+    if (op == "%")
+        return "MOD_INT";
+    if (op == "^")
+        return "POW";
     return op;
 }
 
 // Detectar se o IDENTIFICADOR é um STORE (V MEM) ou LOAD (MEM)
-// se o token anterior na pilha de operandos for um NUMERO_LITERAL ou INSTRUCAO_VFP, 
+// se o token anterior na pilha de operandos for um NUMERO_LITERAL ou INSTRUCAO_VFP,
 // então o IDENTIFICADOR é destino de armazenamento STORE
 // Caso contrário é LOAD.
 
@@ -91,13 +106,13 @@ Derivacao parsear(const vector<TokenData> &tokens,
     // Frame inicial para o nivel do programa
     pilhaFrames.push({});
 
-    size_t    indexToken = 0;
-    string    valorReal;
-    TokenData eofToken   = {"$", "$"};
+    size_t indexToken = 0;
+    string valorReal;
+    TokenData eofToken = {"$", "$"};
 
     string terminalAtual = tokens.empty()
-                           ? "$"
-                           : decodificarToken(tokens[indexToken], valorReal);
+                               ? "$"
+                               : decodificarToken(tokens[indexToken], valorReal);
 
     // No raiz - será preenchido ao final
     ASTNode *raiz = new ASTNode(ASTNodeType::PROGRAMA, "programa");
@@ -107,8 +122,8 @@ Derivacao parsear(const vector<TokenData> &tokens,
     {
         indexToken++;
         terminalAtual = (indexToken < tokens.size())
-                        ? decodificarToken(tokens[indexToken], valorReal)
-                        : decodificarToken(eofToken, valorReal);
+                            ? decodificarToken(tokens[indexToken], valorReal)
+                            : decodificarToken(eofToken, valorReal);
     };
 
     // Lambda: consome o topo da pilha LL verificando match
@@ -372,9 +387,14 @@ Derivacao parsear(const vector<TokenData> &tokens,
             // Registra a producao aplicada na estrutura de derivacao
             derivacao.producoes.push_back({topo, producao});
 
-            // Empilha em ordem reversa (processa da esquerda pra direita)
+            // Empilha em ordem reversa, ignorando o EPSILON
             for (int i = static_cast<int>(producao.size()) - 1; i >= 0; --i)
-                pilhaLL.push(producao[i]);
+            {
+                if (producao[i] != "EPSILON")
+                {
+                    pilhaLL.push(producao[i]);
+                }
+            }
         }
     }
 

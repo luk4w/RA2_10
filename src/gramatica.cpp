@@ -146,6 +146,18 @@ void construirTabelaLL1()
                 continue;
 
             string primeiro_simbolo = producao[0];
+
+            // TRATAMENTO DE NULABILIDADE (PRODUÇÃO VAZIA)
+            if (primeiro_simbolo == "EPSILON")
+            {
+                // Se A -> EPSILON, para todo terminal t em FOLLOW(A), adicione a produção em M[A, t]
+                for (const string &terminal : follow_sets[nao_terminal])
+                {
+                    tabela_ll1[nao_terminal][terminal] = producao;
+                }
+                continue; // Vai para a próxima regra
+            }
+
             set<string> terminais_alvo;
 
             // Se o primeiro símbolo for terminal, o alvo da tabela é ele mesmo
@@ -188,19 +200,19 @@ void construirGramatica()
         {"IDENTIFICADOR"},
         {"operando", "complemento_expressao"}};
 
+    // REGRA ATUALIZADA: Injeção da Produção Vazia
     gramatica["complemento_expressao"] = {
         {"IDENTIFICADOR"},
         {"RES"},
-        {"operando", "operacao"}};
-
+        {"operando", "operacao"},
+        {"EPSILON"}};
     gramatica["operacao"] = {{"OPERADOR"}, {"OPERADOR_RELACIONAL"}, {"WHILE"}, {"operando", "IFELSE"}};
 
     auto first = calcularFirst();
     auto follow = calcularFollow();
 
-    // Imprimir os first e follow pra ver se ta funcionando
-    // printConjunto("FIRST", first);
-    // printConjunto("FOLLOW", follow);
+    printConjunto("FIRST", first);
+    printConjunto("FOLLOW", follow);
 
     construirTabelaLL1();
 }

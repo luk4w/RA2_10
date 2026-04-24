@@ -23,6 +23,17 @@ int main(int argc, char *argv[])
     // Carregar a gramatica // definir regras de producao, calcular FIRST/FOLLOW e a tabela LL(1)
     construirGramatica();
 
+    // imprimir a tabela LL1 no formato de matriz M[nao_terminal, terminal] = regra de prod
+    cout << "--- TABELA DE PARSING LL(1) ---\n";
+    for (const auto& [nao_terminal, transicoes] : tabela_ll1) {
+        for (const auto& [terminal, regra] : transicoes) {
+            cout << "M[" << nao_terminal << ", " << terminal << "] = { ";
+            for (const string& s : regra) cout << s << " ";
+            cout << "}\n";
+        }
+    }
+    cout << "\n\n";
+
     // Validacao do numero de argumentos
     if (argc != 2)
     {
@@ -97,7 +108,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    executarTestesLexicos();
+    // executarTestesLexicos();
 
     // Produz a estrutura de derivacao
     Derivacao derivacao;

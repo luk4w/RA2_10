@@ -208,7 +208,8 @@ void estadoIdentificador(const std::string &linha, size_t &pos, std::vector<std:
         bool is_operando_anterior = (ultimo_token.rfind(std::to_string(static_cast<int>(TipoToken::IDENTIFICADOR)) + ",", 0) == 0 ||
                                      ultimo_token.rfind(std::to_string(static_cast<int>(TipoToken::NUMERO)) + ",", 0) == 0);
 
-        if (is_operando_anterior)
+        // Apenas aplica a trava de operando consecutivo se NÃO for palavra reservada
+        if (is_operando_anterior && !isPalavraReservada(buffer))
         {
             // Unica excecao: atribuicao (NUMERO IDENTIFICADOR) ou acesso (NUMERO RES)
             if (tokens.size() < 2 || tokens[tokens.size() - 2] != std::to_string(static_cast<int>(TipoToken::PARENTESE_ESQ)) + ",(")
