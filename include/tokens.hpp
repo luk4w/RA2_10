@@ -17,6 +17,7 @@ enum class TipoToken
 struct TokenData {
     std::string tipo;
     std::string valor;
+    int linha;
 };
 
 inline const std::string T_NUMERO = std::to_string(static_cast<int>(TipoToken::NUMERO));

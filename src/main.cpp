@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     {
         for (size_t i = 0; i < buffer_linhas.size(); ++i)
         {
-            parseExpressao(buffer_linhas[i], tokens_linha);
+            parseExpressao(buffer_linhas[i], tokens_linha, i+1);
         }
     }
     catch (const std::exception &e)

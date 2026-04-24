@@ -9,7 +9,7 @@
 // O 'inline' impede o erro de multipla definicao caso o main.cpp seja compilado mais de uma vez
 inline void testeNumeros() {
     std::vector<std::string> tokens;
-    parseExpressao("10.5 42", tokens);
+    parseExpressao("10.5 42", tokens, 1);
     
     assert(tokens.size() == 2); 
     // OBS: Ajuste a string abaixo para bater exatamente com o formato que o seu Lexico cospe
@@ -20,7 +20,7 @@ inline void testeNumeros() {
 
 inline void testeOperadores() {
     std::vector<std::string> tokens;
-    parseExpressao("+ | /", tokens);
+    parseExpressao("+ | /", tokens, 1);
     
     assert(tokens.size() == 3);
     assert(tokens[1] == "2,|");
@@ -31,7 +31,7 @@ inline void testeOperadores() {
 
 inline void testeOperadoresRelacionais(){
     std::vector<std::string> tokens;
-    parseExpressao("> < <= >= != ==", tokens);
+    parseExpressao("> < <= >= != ==", tokens, 1);
     assert(tokens.size() == 6);
 
     std::cout << "  -> [OK] Teste de Operadores Relacionais\n";

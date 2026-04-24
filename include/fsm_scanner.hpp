@@ -10,6 +10,6 @@
  * @param linha A linha de expressão a ser analisada
  * @param tokens Referência para os tokens extraídos
  */
-void parseExpressao(std::string linha, std::vector<std::string> &tokens);
+void parseExpressao(std::string linha, std::vector<std::string> &tokens, int numeroLinha);
 
 #endif
