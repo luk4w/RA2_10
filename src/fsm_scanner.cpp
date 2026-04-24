@@ -5,10 +5,9 @@
 int estadoInicial(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
 int estadoNumero(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
 int estadoOperador(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
-int estadoPalavra(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
-int estadoParenteses(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
+int estadoIdentificador(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
+int estadoParentese(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
 int estadoVazio(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
-bool isTokenIdentificador(const std::string &str);
 
 int parseExpressao(std::string linha, std::vector<std::string> &tokens)
 {
@@ -40,19 +39,19 @@ int estadoInicial(const std::string &linha, size_t &pos, std::vector<std::string
     }
     else if (c == '(' || c == ')')
     {
-        return estadoParenteses(linha, pos, tokens);
+        return estadoParentese(linha, pos, tokens);
     }
     else if (c >= '0' && c <= '9')
     {
         return estadoNumero(linha, pos, tokens);
     }
-    else if (c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || c == '^')
+    else if (c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || c == '^' || c == '>' || c == '<' || c == '==')
     {
         return estadoOperador(linha, pos, tokens);
     }
-    else if ((c >= 'A' && c <= 'Z')) // Aceitar apenas letras maiusculas
+    else if (c >= 'A' && c <= 'Z')
     {
-        return estadoPalavra(linha, pos, tokens);
+        return estadoIdentificador(linha, pos, tokens);
     }
 
     std::cerr << "Token invalido '" << c << "' na posicao " << pos << "\n";
@@ -91,7 +90,7 @@ int estadoNumero(const std::string &linha, size_t &pos, std::vector<std::string>
             buffer += c;
             pos++;
         }
-        // Abrange mais casos de fim de token nos arquivos de teste, txt 
+        // Abrange mais casos de fim de token nos arquivos de teste, txt
         else if (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == ')')
         {
             break;
@@ -104,7 +103,7 @@ int estadoNumero(const std::string &linha, size_t &pos, std::vector<std::string>
         }
     }
 
-    tokens.push_back(buffer);
+    tokens.push_back(std::to_string(static_cast<int>(TipoToken::NUMERO)) + "," + buffer);
     return 0;
 }
 
@@ -121,11 +120,11 @@ int estadoOperador(const std::string &linha, size_t &pos, std::vector<std::strin
         op += linha[pos];
         pos++;
     }
-    tokens.push_back(op);
+    tokens.push_back(std::to_string(static_cast<int>(TipoToken::OPERADOR)) + "," + op);
     return 0;
 }
 
-int estadoPalavra(const std::string &linha, size_t &pos, std::vector<std::string> &tokens)
+int estadoIdentificador(const std::string &linha, size_t &pos, std::vector<std::string> &tokens)
 {
     std::string buffer = "";
 
@@ -152,38 +151,47 @@ int estadoPalavra(const std::string &linha, size_t &pos, std::vector<std::string
     }
 
     // Valida identificadores consecutivos
-    if (!tokens.empty() && tokens.back() != "(" && tokens.back() != "RES")
+    if (!tokens.empty())
     {
-        // Verifica se o token anterior é um identificador
-        if (isTokenIdentificador(tokens.back()))
+        const std::string &ultimo_token = tokens.back();
+        bool is_operando_anterior = (ultimo_token.rfind(std::to_string(static_cast<int>(TipoToken::IDENTIFICADOR)) + ",", 0) == 0 ||
+                                     ultimo_token.rfind(std::to_string(static_cast<int>(TipoToken::NUMERO)) + ",", 0) == 0);
+
+        if (is_operando_anterior)
         {
-            // Se for um identificador, exibe o erro de identificadores consecutivos
-            std::cerr << "Identificadores consecutivos " << tokens.back() << " e " << buffer << " na posicao " << pos - buffer.length() << "\n";
-            return 1;
+            // Unica excecao: atribuicao (NUMERO IDENTIFICADOR) ou acesso (NUMERO RES)
+            if (tokens.size() < 2 || tokens[tokens.size() - 2] != std::to_string(static_cast<int>(TipoToken::PARENTESE_ESQ)) + ",(")
+            {
+                std::cerr << "Erro de sintaxe: '" << buffer << "' inesperado apos '" << ultimo_token << "' na posicao " << pos - buffer.length() << "\n";
+                return 1;
+            }
         }
     }
 
-    // Adicionar o token no vetor se o buffer nao estiver vazio
     if (buffer.length() > 0)
     {
-        tokens.push_back(buffer);
+        // Verificar se é palavra reservada ou identificador comum
+        if (isPalavraReservada(buffer))
+            tokens.push_back(std::to_string(static_cast<int>(TipoToken::PALAVRA_RESERVADA)) + "," + buffer);
+        else
+            tokens.push_back(std::to_string(static_cast<int>(TipoToken::IDENTIFICADOR)) + "," + buffer);
     }
 
     return 0;
 }
 
-int estadoParenteses(const std::string &linha, size_t &pos, std::vector<std::string> &tokens)
+int estadoParentese(const std::string &linha, size_t &pos, std::vector<std::string> &tokens)
 {
     std::string p = "";
     p += linha[pos];
-    tokens.push_back(p);
+    if (p == "(")
+    {
+        tokens.push_back(std::to_string(static_cast<int>(TipoToken::PARENTESE_ESQ)) + ",(");
+    }
+    else
+    {
+        tokens.push_back(std::to_string(static_cast<int>(TipoToken::PARENTESE_DIR)) + ",)");
+    }
     pos++;
     return 0;
-}
-
-bool isTokenIdentificador(const std::string &str)
-{
-    if (str.empty())
-        return false;
-    return (str[0] >= 'A' && str[0] <= 'Z');
 }

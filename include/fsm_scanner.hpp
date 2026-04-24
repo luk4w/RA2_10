@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include "tokens.hpp"
 
 /**
  * @brief Função responsável por extrair os tokens de uma linha escrita em notação polonesa reversa (RPN)
@@ -10,6 +11,6 @@
  * @param tokens Referência para os tokens extraídos
  * @return Retorna 0 em caso de sucesso, ou 1 em caso de erro
  */
-int parseExpressao(std::string linha, std::vector<std::string>& tokens);
+int parseExpressao(std::string linha, std::vector<std::string> &tokens);
 
 #endif
