@@ -13,6 +13,7 @@
 #include "gramatica.hpp"
 #include "parser.hpp"
 #include "testes.hpp"
+#include "ast_exporter.hpp"
 
 using namespace std;
 
@@ -108,11 +109,14 @@ int main(int argc, char *argv[])
 
     executarTestesLexicos();
 
-    ASTNode* arvore = nullptr;
+    ASTNode* raiz = nullptr;
     try
     {
         // Executar o analisador sintático LL(1)
-        arvore = parsear(vtokens, tabela_ll1);
+        raiz = parsear(vtokens, tabela_ll1);
+        if (raiz) {
+        exportarAST(raiz, "ast_saida.json");
+    }
     }
     catch (const std::exception &e)
     {
