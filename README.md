@@ -3,7 +3,7 @@
 Lucas Franco de Mello - luk4w
 Nome do grupo no Canvas: RA2 10
 
-> Devido a plataforma do github não permitir a criação de repositórios com espaços, o nome do grupo foi alterado automaticamente para RA2-10, no entanto, o nome real do grupo é RA2 10.
+> Devido a plataforma do github não permitir a criação de repositórios com espaços, o nome do grupo foi alterado para RA2_10, no entanto, o nome real do grupo é RA2 10.
 
 O `ANALISADOR SINTÁTICO` é a segundo fase do projeto da disciplina de `Linguagens Formais e Compiladores` ministrada pelo professor `Frank de Alcantara` na `Pontifícia Universidade Católica do Paraná`.
 
