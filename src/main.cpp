@@ -11,6 +11,8 @@
 #include "armv7_generator.hpp"
 #include "tokens.hpp"
 #include "gramatica.hpp"
+#include "parser.hpp"
+#include "testes.hpp"
 
 using namespace std;
 
@@ -20,15 +22,15 @@ int main(int argc, char *argv[])
     construirGramatica();
 
     // imprimir a tabela LL1 no formato de matriz M[nao_terminal, terminal] = regra de prod
-    cout << "--- TABELA DE PARSING LL(1) ---\n";
-    for (const auto& [nao_terminal, transicoes] : tabela_ll1) {
-        for (const auto& [terminal, regra] : transicoes) {
-            cout << "M[" << nao_terminal << ", " << terminal << "] = { ";
-            for (const string& s : regra) cout << s << " ";
-            cout << "}\n";
-        }
-    }
-    cout << "\n\n";
+    // cout << "--- TABELA DE PARSING LL(1) ---\n";
+    // for (const auto& [nao_terminal, transicoes] : tabela_ll1) {
+    //     for (const auto& [terminal, regra] : transicoes) {
+    //         cout << "M[" << nao_terminal << ", " << terminal << "] = { ";
+    //         for (const string& s : regra) cout << s << " ";
+    //         cout << "}\n";
+    //     }
+    // }
+    // cout << "\n\n";
 
     // Validacao do numero de argumentos
     if (argc != 2)
@@ -97,9 +99,6 @@ int main(int argc, char *argv[])
     {
         // Ler o arquivo tokens.txt salvo
         vtokens = lerTokens("tokens.txt");
-        // for (const auto& t : vtokens) {
-        //     std::cout << "Tipo: " << t.tipo << " | Valor: [" << t.valor << "]\n";
-        // }
     }
     catch (std::exception &e)
     {
@@ -107,29 +106,20 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    executarTestesLexicos();
 
-
-    string output;
+    ASTNode* arvore = nullptr;
     try
     {
-        gerarAssembly(tokens_linha, output);
-        // Gerar arquivo de saida .txt com o codigo assembly
-        string nomeSaida = arq.substr(0, arq.length() - 4) + "_assembly.txt";
-        ofstream outFile(nomeSaida);
-        if (!outFile.is_open())
-        {
-            cerr << "nao foi possivel criar o arquivo " << nomeSaida << "\n";
-            return 1;
-        }
-        outFile << output; // manda o buffer da ram pro disco rigido
-        outFile.close();
-        cout << "Codigo assembly gerado com sucesso em " << nomeSaida << "\n";
+        // Executar o analisador sintático LL(1)
+        arvore = parsear(vtokens, tabela_ll1);
     }
-    catch (std::exception &e)
+    catch (const std::exception &e)
     {
-        cerr << "Erro ao gerar codigo assembly\n";
+        cerr << e.what() << "\n";
         return 1;
     }
 
     return 0;
 }
+

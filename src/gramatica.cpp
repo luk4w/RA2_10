@@ -199,8 +199,8 @@ void construirGramatica()
     auto follow = calcularFollow();
 
     // Imprimir os first e follow pra ver se ta funcionando
-    printConjunto("FIRST", first);
-    printConjunto("FOLLOW", follow);
+    // printConjunto("FIRST", first);
+    // printConjunto("FOLLOW", follow);
 
     construirTabelaLL1();
 }

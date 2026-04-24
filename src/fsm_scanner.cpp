@@ -42,8 +42,7 @@ void estadoInicial(const std::string &linha, size_t &pos, std::vector<std::strin
     {
         return estadoNumero(linha, pos, tokens);
     }
-    else if (c == '+' || c == '-' || c == '*' || c == '/' || c == '|' ||
-             c == '%' || c == '^' || c == '<' || c == '>' || c == '=' || c == '!')
+    else if (c == '+' || c == '-' || c == '*' || c == '/' || c == '|' || c == '%' || c == '^' || c == '<' || c == '>' || c == '=' || c == '!')
     {
         return estadoOperador(linha, pos, tokens);
     }
@@ -147,6 +146,19 @@ void estadoOperador(const std::string &linha, size_t &pos, std::vector<std::stri
                 {
                     return estadoNumero(linha, pos, tokens);
                 }
+            }
+        }
+
+        // Evitar // ou || perdidos da Fase 1
+        if (pos + 1 < linha.length())
+        {
+            if (c == '/' && linha[pos + 1] == '/')
+            {
+                throw std::runtime_error(std::string("O operador '//' nao existe. Use '/' para divisao inteira ou '|' para real. Posicao: ") + std::to_string(pos) + "\n");
+            }
+            if (c == '|' && linha[pos + 1] == '|')
+            {
+                throw std::runtime_error(std::string("O operador '||' e invalido. Use '|' para divisao real. Posicao: ") + std::to_string(pos) + "\n");
             }
         }
 

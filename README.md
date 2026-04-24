@@ -3,9 +3,14 @@
 Lucas Franco de Mello - luk4w
 Nome do grupo no Canvas: RA2 10
 
+Instituição: Pontifícia Universidade Católica do Paraná (PUCPR)  
+Disciplina: Linguagens Formais e Autômatos  
+Professor: Frank de Alcantara  
+Ano: 2026
+
 > Devido a plataforma do github não permitir a criação de repositórios com espaços, o nome do grupo foi alterado para RA2_10, no entanto, o nome real do grupo é RA2 10.
 
-O `ANALISADOR SINTÁTICO` é a segundo fase do projeto da disciplina de `Linguagens Formais e Compiladores` ministrada pelo professor `Frank de Alcantara` na `Pontifícia Universidade Católica do Paraná`.
+O `ANALISADOR SINTÁTICO` é a segunda fase do projeto da disciplina de `Linguagens Formais e Autômatos` ministrada pelo professor `Frank de Alcantara` na `Pontifícia Universidade Católica do Paraná`.
 
 As instruções do professor determinam que o programa deve:
 > 1. Implementar estruturas de controle (tomada de decisão e laços) mantendo a notação polonesa reversa;
@@ -37,8 +42,41 @@ A extensão [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms
 2. A extensão identificará o arquivo `CMakeLists.txt` então, através da paleta de comandos `Ctrl+Shift+p`, ou o atalho que você configurou, selecione um **Kit** de compilação, escolha a arquitetura nativa do MSVC (ex: `Visual Studio Community 2022 Release - x86_amd64`).
 3. Aguarde o processo de configuração (*Configuring*) terminar. O CMake irá gerar a árvore de diretórios e o *cache* de compilação.
 4. Utilize o atalho `Ctrl+Shift+p` para abrir a paleta de comandos, e execute `CMake: Build` para iniciar a compilação do projeto.
-5. Se não houver erros, o executável final (`AnalisadorSintatico.exe`) será buildado dentro do diretório `build/Debug/` (ou `build/Release/`), dependendo da configuração selecionada.
+5. Se não houver erros, o executável final (`AnalisadorSintatico.exe`) será gerado dentro do diretório `build/Debug/` (ou `build/Release/`), dependendo da configuração selecionada.
 
+### Sintaxe das Estruturas de Controle
+
+A linguagem mantém a notação polonesa reversa (RPN) para todas as estruturas. Os operandos sempre precedem a keyword que os opera.
+
+#### Tomada de Decisão — `IFELSE`
+
+Requer **3 operandos** antes da keyword: condição, bloco verdadeiro e bloco falso.
+
+```
+( (condição) (bloco_verdadeiro) (bloco_falso) IFELSE )
+```
+
+**Exemplo** — se `A > B`, retorna `A + B`, senão retorna `A - B`:
+```
+( (A B >) (A B +) (A B -) IFELSE )
+```
+
+A condição deve ser uma expressão que resulte em valor comparável via operador relacional (`<`, `>`, `==`, `!=`, `<=`, `>=`). Ambos os blocos são obrigatórios.
+
+#### Laço de Repetição — `WHILE`
+
+Requer **2 operandos** antes da keyword: condição e bloco de repetição.
+
+```
+( (condição) (bloco_repeticao) WHILE )
+```
+
+**Exemplo** — enquanto `CONTADOR < 10`, soma `1` ao contador e armazena:
+```
+( ((CONTADOR) 10 <) (((CONTADOR) 1 +) CONTADOR) WHILE )
+```
+
+O laço avalia a condição antes de cada iteração. Quando a condição resulta em falso, a execução continua na linha seguinte ao `WHILE`.
 
 ## Gramática EBNF LL(1) Fatorada
 
