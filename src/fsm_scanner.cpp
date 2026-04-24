@@ -1,34 +1,31 @@
 #include <fsm_scanner.hpp>
 #include <iostream>
+#include <stdexcept>
 
 // Protótipos de funções
-int estadoInicial(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
-int estadoNumero(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
-int estadoOperador(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
-int estadoIdentificador(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
-int estadoParentese(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
-int estadoVazio(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
+void estadoInicial(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
+void estadoNumero(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
+void estadoOperador(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
+void estadoIdentificador(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
+void estadoParentese(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
+void estadoVazio(const std::string &linha, size_t &pos, std::vector<std::string> &tokens);
 
-int parseExpressao(std::string linha, std::vector<std::string> &tokens)
+void parseExpressao(std::string linha, std::vector<std::string> &tokens)
 {
     size_t pos = 0;
 
     // Processa a linha enquanto tiver caracteres para ler
     while (pos < linha.length())
     {
-        int status = estadoInicial(linha, pos, tokens);
-        // Retorna se ocorrer um erro durante o processamento
-        if (status != 0)
-            return status;
+        estadoInicial(linha, pos, tokens);
     }
-    return 0;
 }
 
-int estadoInicial(const std::string &linha, size_t &pos, std::vector<std::string> &tokens)
+void estadoInicial(const std::string &linha, size_t &pos, std::vector<std::string> &tokens)
 {
     // Verifica se a posicao chegou no final da linha
     if (pos >= linha.length())
-        return 0;
+        return;
 
     char c = linha[pos];
 
@@ -45,7 +42,8 @@ int estadoInicial(const std::string &linha, size_t &pos, std::vector<std::string
     {
         return estadoNumero(linha, pos, tokens);
     }
-    else if (c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || c == '^' || c == '>' || c == '<' || c == '==')
+    else if (c == '+' || c == '-' || c == '*' || c == '/' || c == '|' ||
+             c == '%' || c == '^' || c == '<' || c == '>' || c == '=' || c == '!')
     {
         return estadoOperador(linha, pos, tokens);
     }
@@ -54,17 +52,15 @@ int estadoInicial(const std::string &linha, size_t &pos, std::vector<std::string
         return estadoIdentificador(linha, pos, tokens);
     }
 
-    std::cerr << "Token invalido '" << c << "' na posicao " << pos << "\n";
-    return 1;
+    throw std::runtime_error("Token invalido '" + std::string(1, c) + "' na posicao " + std::to_string(pos));
 }
 
-int estadoVazio(const std::string &linha, size_t &pos, std::vector<std::string> &tokens)
+void estadoVazio(const std::string &linha, size_t &pos, std::vector<std::string> &tokens)
 {
     pos++;
-    return 0;
 }
 
-int estadoNumero(const std::string &linha, size_t &pos, std::vector<std::string> &tokens)
+void estadoNumero(const std::string &linha, size_t &pos, std::vector<std::string> &tokens)
 {
     std::string buffer = "";
     bool flag_ponto_decimal = false;
@@ -83,8 +79,7 @@ int estadoNumero(const std::string &linha, size_t &pos, std::vector<std::string>
         {
             if (flag_ponto_decimal)
             {
-                std::cerr << "Numero malformado em: " << buffer << c << "\n";
-                return 1;
+                throw std::runtime_error("Numero malformado em: " + buffer + c + "\n");
             }
             flag_ponto_decimal = true;
             buffer += c;
@@ -98,33 +93,78 @@ int estadoNumero(const std::string &linha, size_t &pos, std::vector<std::string>
         else
         {
             // letra com operador ou numero com letra -> 123ABC ou 123+
-            std::cerr << "Lixo ou letra apos numero '" << c << "' na posicao " << pos << "\n";
-            return 1;
+            throw std::runtime_error(std::string("Lixo ou letra apos numero '") + c + "' na posicao " + std::to_string(pos) + "\n");
         }
     }
 
     tokens.push_back(std::to_string(static_cast<int>(TipoToken::NUMERO)) + "," + buffer);
-    return 0;
+    return;
 }
 
-int estadoOperador(const std::string &linha, size_t &pos, std::vector<std::string> &tokens)
+void estadoOperador(const std::string &linha, size_t &pos, std::vector<std::string> &tokens)
 {
-    std::string op = "";
     char c = linha[pos];
-    op += c;
-    pos++;
 
-    // Tratar divisao inteira
-    if (c == '/' && pos < linha.length() && linha[pos] == '/')
+    // Tenta casar os Operadores Relacionais de 2 caracteres (==, !=, <=, >=)
+    if (pos + 1 < linha.length())
     {
-        op += linha[pos];
-        pos++;
+        std::string op2 = linha.substr(pos, 2);
+        if (op2 == "==" || op2 == "!=" || op2 == "<=" || op2 == ">=")
+        {
+            tokens.push_back(std::to_string(static_cast<int>(TipoToken::OPERADOR_RELACIONAL)) + "," + op2);
+            pos += 2;
+            return;
+        }
     }
-    tokens.push_back(std::to_string(static_cast<int>(TipoToken::OPERADOR)) + "," + op);
-    return 0;
+
+    // Tenta casar os Operadores Relacionais de 1 caractere (<, >)
+    if (c == '<' || c == '>')
+    {
+        tokens.push_back(std::to_string(static_cast<int>(TipoToken::OPERADOR_RELACIONAL)) + "," + std::string(1, c));
+        pos++;
+        return;
+    }
+
+    // Tenta casar os Operadores Matemáticos (+, -, *, /, |, %, ^)
+    if (c == '+' || c == '-' || c == '*' || c == '/' || c == '|' || c == '%' || c == '^')
+    {
+        // Regra especial para o sinal de menos (número negativo)
+        if (c == '-')
+        {
+            if (pos + 1 < linha.length() && isdigit(linha[pos + 1]))
+            {
+                // Verifica se o token anterior não é um operando (número, identificador ou ')')
+                bool is_operando_anterior = false;
+                if (!tokens.empty())
+                {
+                    std::string ultimo_token = tokens.back();
+                    is_operando_anterior = (ultimo_token.rfind(std::to_string(static_cast<int>(TipoToken::PARENTESE_DIR)) + ",", 0) == 0 ||
+                                            ultimo_token.rfind(std::to_string(static_cast<int>(TipoToken::IDENTIFICADOR)) + ",", 0) == 0 ||
+                                            ultimo_token.rfind(std::to_string(static_cast<int>(TipoToken::NUMERO)) + ",", 0) == 0);
+                }
+
+                if (!is_operando_anterior)
+                {
+                    return estadoNumero(linha, pos, tokens);
+                }
+            }
+        }
+
+        tokens.push_back(std::to_string(static_cast<int>(TipoToken::OPERADOR)) + "," + std::string(1, c));
+        pos++;
+        return; // Sucesso
+    }
+
+    // escreveu somente = em vez de == ou ! ao inves de != --> erro léxico
+    if (c == '=' || c == '!')
+    {
+        throw std::runtime_error(std::string("Operador relacional incompleto ou invalido '") + c + "' na posicao " + std::to_string(pos) + "\n");
+    }
+
+    throw std::runtime_error("Operador desconhecido");
 }
 
-int estadoIdentificador(const std::string &linha, size_t &pos, std::vector<std::string> &tokens)
+void estadoIdentificador(const std::string &linha, size_t &pos, std::vector<std::string> &tokens)
 {
     std::string buffer = "";
 
@@ -145,8 +185,7 @@ int estadoIdentificador(const std::string &linha, size_t &pos, std::vector<std::
         }
         else
         {
-            std::cerr << "Token invalido '" << c << "' na posicao " << pos << "\n";
-            return 1;
+            throw std::runtime_error(std::string("Token invalido '") + c + "' na posicao " + std::to_string(pos) + "\n");
         }
     }
 
@@ -162,8 +201,7 @@ int estadoIdentificador(const std::string &linha, size_t &pos, std::vector<std::
             // Unica excecao: atribuicao (NUMERO IDENTIFICADOR) ou acesso (NUMERO RES)
             if (tokens.size() < 2 || tokens[tokens.size() - 2] != std::to_string(static_cast<int>(TipoToken::PARENTESE_ESQ)) + ",(")
             {
-                std::cerr << "Erro de sintaxe: '" << buffer << "' inesperado apos '" << ultimo_token << "' na posicao " << pos - buffer.length() << "\n";
-                return 1;
+                throw std::runtime_error("Erro de sintaxe: '" + buffer + "' inesperado apos '" + ultimo_token + "' na posicao " + std::to_string(pos - buffer.length()) + "\n");
             }
         }
     }
@@ -177,10 +215,10 @@ int estadoIdentificador(const std::string &linha, size_t &pos, std::vector<std::
             tokens.push_back(std::to_string(static_cast<int>(TipoToken::IDENTIFICADOR)) + "," + buffer);
     }
 
-    return 0;
+    return;
 }
 
-int estadoParentese(const std::string &linha, size_t &pos, std::vector<std::string> &tokens)
+void estadoParentese(const std::string &linha, size_t &pos, std::vector<std::string> &tokens)
 {
     std::string p = "";
     p += linha[pos];
@@ -193,5 +231,5 @@ int estadoParentese(const std::string &linha, size_t &pos, std::vector<std::stri
         tokens.push_back(std::to_string(static_cast<int>(TipoToken::PARENTESE_DIR)) + ",)");
     }
     pos++;
-    return 0;
+    return;
 }

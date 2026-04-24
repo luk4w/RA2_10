@@ -45,19 +45,19 @@ A extensão [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms
 Para garantir que o Analisador Sintático opere de forma determinística, a gramática em Notação Polonesa Reversa (RPN) foi submetida à Fatoração à Esquerda. Isso eliminou os conflitos de derivação, e resultou na seguinte estrutura formal:
 
 **Regras de Produção:**
-1. `programa -> PAREN_ESQ START PAREN_DIR sequencia_execucao`
-2. `sequencia_execucao -> PAREN_ESQ avaliacao_sequencia`
-3. `avaliacao_sequencia -> END PAREN_DIR | corpo_expressao PAREN_DIR sequencia_execucao`
-4. `expressao_aninhada -> PAREN_ESQ corpo_expressao PAREN_DIR`
+1. `programa -> PARENTESE_ESQ START PARENTESE_DIR sequencia_execucao`
+2. `sequencia_execucao -> PARENTESE_ESQ avaliacao_sequencia`
+3. `avaliacao_sequencia -> END PARENTESE_DIR | corpo_expressao PARENTESE_DIR sequencia_execucao`
+4. `expressao_aninhada -> PARENTESE_ESQ corpo_expressao PARENTESE_DIR`
 5. `operando -> NUMERO | expressao_aninhada`
 6. `corpo_expressao -> operando complemento_expressao | ID`
 7. `complemento_expressao -> operando operacao | ID`
-8. `operacao -> OP_MAT | OP_REL | operando IFELSE | WHILE`
+8. `operacao -> OPERADOR | OPERADOR_RELACIONAL | operando IFELSE | WHILE`
 
 ### Dicionário de Símbolos
 
 **Terminais (Tokens):**
-`PAREN_ESQ`, `PAREN_DIR`, `START`, `END`, `NUMERO`, `ID`, `OP_MAT`, `OP_REL`, `IFELSE`, `WHILE`
+`PARENTESE_ESQ`, `PARENTESE_DIR`, `START`, `END`, `NUMERO`, `ID`, `OPERADOR`, `OPERADOR_RELACIONAL`, `IFELSE`, `WHILE`
 
 **Não-Terminais (Variáveis da AST):**
 `programa`, `sequencia_execucao`, `avaliacao_sequencia`, `expressao_aninhada`, `operando`, `corpo_expressao`, `complemento_expressao`, `operacao`
@@ -67,30 +67,30 @@ Para garantir que o Analisador Sintático opere de forma determinística, a gram
 O cálculo teórico exigido para provar a ausência de conflitos ambíguos na árvore sintática:
 
 **FIRST**:
-* **FIRST(programa)** = { `PAREN_ESQ` }
-* **FIRST(sequencia_execucao)** = { `PAREN_ESQ` }
-* **FIRST(avaliacao_sequencia)** = { `END`, `NUMERO`, `PAREN_ESQ`, `ID` }
-* **FIRST(expressao_aninhada)** = { `PAREN_ESQ` }
-* **FIRST(operando)** = { `NUMERO`, `PAREN_ESQ` }
-* **FIRST(corpo_expressao)** = { `NUMERO`, `PAREN_ESQ`, `ID` }
-* **FIRST(complemento_expressao)** = { `NUMERO`, `PAREN_ESQ`, `ID` }
-* **FIRST(operacao)** = { `OP_MAT`, `OP_REL`, `NUMERO`, `PAREN_ESQ`, `WHILE` }
+* **FIRST(programa)** = { `PARENTESE_ESQ` }
+* **FIRST(sequencia_execucao)** = { `PARENTESE_ESQ` }
+* **FIRST(avaliacao_sequencia)** = { `END`, `NUMERO`, `PARENTESE_ESQ`, `ID` }
+* **FIRST(expressao_aninhada)** = { `PARENTESE_ESQ` }
+* **FIRST(operando)** = { `NUMERO`, `PARENTESE_ESQ` }
+* **FIRST(corpo_expressao)** = { `NUMERO`, `PARENTESE_ESQ`, `ID` }
+* **FIRST(complemento_expressao)** = { `NUMERO`, `PARENTESE_ESQ`, `ID` }
+* **FIRST(operacao)** = { `OPERADOR`, `OPERADOR_RELACIONAL`, `NUMERO`, `PARENTESE_ESQ`, `WHILE` }
 
 **FOLLOW**:
 * **FOLLOW(programa)** = { `$` }
 * **FOLLOW(sequencia_execucao)** = { `$` }
 * **FOLLOW(avaliacao_sequencia)** = { `$` }
-* **FOLLOW(expressao_aninhada)** = { `NUMERO`, `PAREN_ESQ`, `ID`, `OP_MAT`, `OP_REL`, `WHILE`, `IFELSE` }
-* **FOLLOW(operando)** = { `NUMERO`, `PAREN_ESQ`, `ID`, `OP_MAT`, `OP_REL`, `WHILE`, `IFELSE` }
-* **FOLLOW(corpo_expressao)** = { `PAREN_DIR` }
-* **FOLLOW(complemento_expressao)** = { `PAREN_DIR` }
-* **FOLLOW(operacao)** = { `PAREN_DIR` }
+* **FOLLOW(expressao_aninhada)** = { `NUMERO`, `PARENTESE_ESQ`, `ID`, `OPERADOR`, `OPERADOR_RELACIONAL`, `WHILE`, `IFELSE` }
+* **FOLLOW(operando)** = { `NUMERO`, `PARENTESE_ESQ`, `ID`, `OPERADOR`, `OPERADOR_RELACIONAL`, `WHILE`, `IFELSE` }
+* **FOLLOW(corpo_expressao)** = { `PARENTESE_DIR` }
+* **FOLLOW(complemento_expressao)** = { `PARENTESE_DIR` }
+* **FOLLOW(operacao)** = { `PARENTESE_DIR` }
 
 ### Tabela de Parsing LL(1)
 
 A matriz de decisão para a implementação das funções recursivas do compilador. Os números indicam qual "Regra de Produção" acima deve ser invocada. Células em branco indicam *Syntax Error*.
 
-| Não-Terminal | `(` | `)` | `START` | `END` | `NUMERO` | `ID` | `OP_MAT` | `OP_REL` | `IFELSE` | `WHILE` | `$` |
+| Não-Terminal | `(` | `)` | `START` | `END` | `NUMERO` | `ID` | `OPERADOR` | `OPERADOR_RELACIONAL` | `IFELSE` | `WHILE` | `$` |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **programa** | 1 | | | | | | | | | | |
 | **sequencia_execucao** | 2 | | | | | | | | | | |
@@ -102,16 +102,16 @@ A matriz de decisão para a implementação das funções recursivas do compilad
 | **operacao** | 8c | | | | 8c | | 8a | 8b | | 8d | |
 
 **Legenda das ramificações:**
-* **3a:** `END PAREN_DIR`
-* **3b:** `corpo_expressao PAREN_DIR sequencia_execucao`
+* **3a:** `END PARENTESE_DIR`
+* **3b:** `corpo_expressao PARENTESE_DIR sequencia_execucao`
 * **5a:** `NUMERO`
 * **5b:** `expressao_aninhada`
 * **6a:** `operando complemento_expressao`
 * **6b:** `ID`
 * **7a:** `operando operacao`
 * **7b:** `ID`
-* **8a:** `OP_MAT`
-* **8b:** `OP_REL`
+* **8a:** `OPERADOR`
+* **8b:** `OPERADOR_RELACIONAL`
 * **8c:** `operando IFELSE`
 * **8d:** `WHILE`
 

@@ -10,7 +10,7 @@
 #include "fsm_scanner.hpp"
 #include "armv7_generator.hpp"
 #include "parser.hpp"
-#include "tokens.hpp" 
+#include "tokens.hpp"
 
 using namespace std;
 
@@ -37,34 +37,60 @@ int main(int argc, char *argv[])
     vector<string> buffer_linhas;
 
     // Extrair os dados do arquivo e armazenar no buffer
-    lerArquivo(arq, buffer_linhas);
+    try
+    {
+        lerArquivo(arq, buffer_linhas);
+    }
+    catch (std::exception &e)
+    {
+        cerr << "Erro ao ler arquivo " << arq << "\n";
+        return 1;
+    }
 
     // Extrair os tokens de cada linha individualmente
     vector<string> tokens_linha;
-    for (size_t i = 0; i < buffer_linhas.size(); ++i)
+    try
     {
-        int status = parseExpressao(buffer_linhas[i], tokens_linha);
-        if (status != 0)
+        for (size_t i = 0; i < buffer_linhas.size(); ++i)
         {
-            cerr << "Erro lexico encontrado na linha " << i + 1 << endl;
-            return -1;
+            parseExpressao(buffer_linhas[i], tokens_linha);
         }
     }
-
-    // Salvar os tokens em um arquivo da ultima execucao
-    ofstream tokenFile("tokens.txt");
-    for (const auto &token : tokens_linha)
+    catch (const std::exception &e)
     {
-        tokenFile << token << "\n";
+        cerr << "Erro lexico: " << e.what() << "\n";
+        return 1;
     }
-    tokenFile.close();
 
-    // Ler o arquivo tokens.txt salvo
-    std::vector<TokenData> vtokens = lerTokens("tokens.txt");
+    try
+    {
+        // Salvar os tokens em um arquivo da ultima execucao
+        ofstream tokenFile("tokens.txt");
+        for (const auto &token : tokens_linha)
+        {
+            tokenFile << token << "\n";
+        }
+        tokenFile.close();
+    }
+    catch (std::exception &e)
+    {
+        cerr << "Falha ao salvar tokens " << e.what() << "\n";
+        return 1;
+    }
 
-    // for (const auto& t : vtokens) {
-    //     std::cout << "Tipo: " << t.tipo << " | Valor: [" << t.valor << "]\n";
-    // }
+    try
+    {
+        // Ler o arquivo tokens.txt salvo
+        std::vector<TokenData> vtokens = lerTokens("tokens.txt");
+        // for (const auto& t : vtokens) {
+        //     std::cout << "Tipo: " << t.tipo << " | Valor: [" << t.valor << "]\n";
+        // }
+    }
+    catch (std::exception &e)
+    {
+        cerr << "Falha ao ler arquivo de tokens" << endl;
+        return 1;
+    }
 
     string output;
     if (gerarAssembly(tokens_linha, output))
