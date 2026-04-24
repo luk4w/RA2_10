@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
 
 # Define o nome do projeto, versão e linguagens utilizadas
-project(asmnator VERSION 1.0 LANGUAGES C CXX)
+project(AnalisadorSintatico VERSION 1.0 LANGUAGES C CXX)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Inclusão de diretório(s)
 include_directories(include)
@@ -11,8 +15,8 @@ set(SOURCES
     src/main.cpp
     src/cli_controller.cpp
     src/fsm_scanner.cpp
-    src/rpn_evaluator.cpp
     src/armv7_generator.cpp
+    src/parser.cpp
 )
 
 # Define o nome do executável e o(s) arquivo(s) fonte
