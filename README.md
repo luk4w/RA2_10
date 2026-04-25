@@ -78,6 +78,32 @@ Requer **2 operandos** antes da keyword: condição e bloco de repetição.
 
 O laço avalia a condição antes de cada iteração. Quando a condição resulta em falso, a execução continua na linha seguinte ao `WHILE`.
 
+### Comandos Especiais (Manipulação de Memória e Histórico)
+
+A linguagem suporta operações de estado utilizando as palavras reservadas `RES` e identificadores arbitrários para variáveis (`MEM`). A sintaxe segue a notação polonesa reversa:
+
+#### Leitura de Histórico `RES`: `(N RES)`
+Retorna o valor computado `N` expressões atrás no histórico da FPU. O índice `N` deve ser um inteiro não negativo, onde `0` representa o último resultado avaliado. Exemplo:
+```
+(0 RES)
+```
+Carrega o resultado imediatamente anterior.
+
+#### Escrita em Memória `STORE`: `(V MEM)`
+Armazena o valor `V` (que pode ser um literal numérico ou o resultado de uma expressão aninhada) na variável identificada por `MEM`. Exemplos:
+```
+(10.5 CONTADOR)
+```
+```
+((5 2 +) X)
+```
+
+#### Leitura de Memória `LOAD`: `(MEM)`
+Carrega na pilha da FPU o valor atual armazenado na variável identificada. Se a variável não houver sido inicializada, o valor padrão retornado é `0.0`. Exemplo:
+```
+((CONTADOR) 1 +)
+```
+
 ## Gramática EBNF LL(1) Fatorada
 
 Para garantir que o Analisador Sintático opere de forma determinística, a gramática em Notação Polonesa Reversa (RPN) foi submetida à Fatoração à Esquerda. Isso eliminou os conflitos de derivação, e resultou na seguinte estrutura formal:
@@ -88,8 +114,8 @@ Para garantir que o Analisador Sintático opere de forma determinística, a gram
 3. `avaliacao_sequencia -> END PARENTESE_DIR | corpo_expressao PARENTESE_DIR sequencia_execucao`
 4. `expressao_aninhada -> PARENTESE_ESQ corpo_expressao PARENTESE_DIR`
 5. `operando -> NUMERO | expressao_aninhada`
-6. `corpo_expressao -> operando complemento_expressao | ID`
-7. `complemento_expressao -> operando operacao | ID`
+6. `corpo_expressao -> operando complemento_expressao | IDENTIFICADOR`
+7. `complemento_expressao -> operando operacao | IDENTIFICADOR | RES | ε`
 8. `operacao -> OPERADOR | OPERADOR_RELACIONAL | operando IFELSE | WHILE`
 
 ### Dicionário de Símbolos
@@ -104,17 +130,17 @@ Para garantir que o Analisador Sintático opere de forma determinística, a gram
 
 O cálculo teórico exigido para provar a ausência de conflitos ambíguos na árvore sintática:
 
-### Conjuntos FIRST
+#### Conjuntos FIRST
 * **FIRST(programa)** = { `PARENTESE_ESQ` }
 * **FIRST(sequencia_execucao)** = { `PARENTESE_ESQ` }
 * **FIRST(avaliacao_sequencia)** = { `END`, `IDENTIFICADOR`, `NUMERO`, `PARENTESE_ESQ` }
 * **FIRST(expressao_aninhada)** = { `PARENTESE_ESQ` }
 * **FIRST(operando)** = { `NUMERO`, `PARENTESE_ESQ` }
 * **FIRST(corpo_expressao)** = { `IDENTIFICADOR`, `NUMERO`, `PARENTESE_ESQ` }
-* **FIRST(complemento_expressao)** = { `IDENTIFICADOR`, `NUMERO`, `PARENTESE_ESQ`, `RES` }
+* **FIRST(complemento_expressao)** = { `IDENTIFICADOR`, `NUMERO`, `PARENTESE_ESQ`, `RES`, `ε` }
 * **FIRST(operacao)** = { `NUMERO`, `OPERADOR`, `OPERADOR_RELACIONAL`, `PARENTESE_ESQ`, `WHILE` }
 
-### Conjuntos FOLLOW
+#### Conjuntos FOLLOW
 * **FOLLOW(programa)** = { `$` }
 * **FOLLOW(sequencia_execucao)** = { `$` }
 * **FOLLOW(avaliacao_sequencia)** = { `$` }
@@ -128,7 +154,7 @@ O cálculo teórico exigido para provar a ausência de conflitos ambíguos na á
 
 A tabela LL(1) serve para guiar o parser preditivo descendente na determinação de qual regra gramatical (produção) deve ser aplicada a seguir, sem precisar de backtracking.
 
-As células em branco indicam *Syntax Error*.
+Células vazias indicam erro sintático. $\epsilon$ indica derivação para vazio.
 
 #### Formato compacto
 `M[Não-terminal, Terminal] = Produção`
@@ -139,6 +165,7 @@ M[avaliacao_sequencia, NUMERO] = { corpo_expressao PARENTESE_DIR sequencia_execu
 M[avaliacao_sequencia, PARENTESE_ESQ] = { corpo_expressao PARENTESE_DIR sequencia_execucao }
 M[complemento_expressao, IDENTIFICADOR] = { IDENTIFICADOR }
 M[complemento_expressao, NUMERO] = { operando operacao }
+M[complemento_expressao, PARENTESE_DIR] = { EPSILON }
 M[complemento_expressao, PARENTESE_ESQ] = { operando operacao }
 M[complemento_expressao, RES] = { RES }
 M[corpo_expressao, IDENTIFICADOR] = { IDENTIFICADOR }
@@ -166,7 +193,7 @@ M[sequencia_execucao, PARENTESE_ESQ] = { PARENTESE_ESQ avaliacao_sequencia }
 | **expressao_aninhada** | 4 | | | | | | | | | | |
 | **operando** | 5b | | | | 5a | | | | | | |
 | **corpo_expressao** | 6a | | | | 6a | 6b | | | | | |
-| **complemento_expressao** | 7a | | | | 7a | 7b | | | | | 7c |
+| **complemento_expressao** | 7a | 7d | | | 7a | 7b | | | | | 7c |
 | **operacao** | 8c | | | | 8c | | 8a | 8b | | 8d | |
  
 #### Legenda
@@ -184,7 +211,50 @@ M[sequencia_execucao, PARENTESE_ESQ] = { PARENTESE_ESQ avaliacao_sequencia }
 | **7a** | `operando operacao` |
 | **7b** | `IDENTIFICADOR` |
 | **7c** | `RES` |
+| **7d** | `ε` |
 | **8a** | `OPERADOR` |
 | **8b** | `OPERADOR_RELACIONAL` |
 | **8c** | `operando IFELSE` |
 | **8d** | `WHILE` |
+
+
+## Resultados
+
+Para assegurar a conformidade com a norma IEEE 754 de 64 bits (Double Precision) exigida pelo edital, todos os resultados obtidos nos 32 LEDs do simulador foram submetidos a um processo de verificação cruzada.
+
+#### Metodologia de Verificação
+
+* **Cálculo Analítico:** Resolução manual da pilha RPN para determinar o valor decimal esperado de cada expressão.
+* **Extração de Bits:** Captura dos estados lógicos dos LEDs (Palavra Alta e Palavra Baixa) a partir da injeção de JavaScript no DOM do CPULator. A montagem das palavras de 64 bits foi validada e comparada com a ferramenta online [BinaryConvert (Double Precision)](https://www.binaryconvert.com/result_double.html).
+
+**Script de Captura (Bit Sniffer):**
+```javascript
+(function() {
+    const leds = document.querySelectorAll('#devff200000 .dev_led_led');
+    let binary = Array.from(leds)
+        .map(led => led.classList.contains('dev_led_on') ? '1' : '0')
+        .join('');
+    let hex = parseInt(binary, 2).toString(16).toUpperCase().padStart(8, '0');
+    console.log("%c ASMNATOR - Bit Sniffer ", "background: #222; color: #bada55; padding: 2px;");
+    console.log("Binário (31-0): " + binary);
+    console.log("Hexadecimal: 0x" + hex);
+})();
+```
+
+#### Evidências de Teste (Casos de Sucesso)
+
+A tabela abaixo detalha os testes realizados para validar a recursividade da gramática e a corretude do gerador de código para fluxos de controle e aritmética complexa.
+
+| Caso de Teste | Expressão RPN Relevante | Resultado Esperado | Palavra Alta (Hex) | Palavra Baixa (Hex) | Status |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **Potência Recursiva (T2)** | `( ( ( ( 2 2 ^ ) 2 ^ ) 2 ^ ) )` | `256.0` | `0x40700000` | `0x00000000` |  OK |
+| **Lógica Condicional (T3)** | `( ((0 RES) 500.0 >=) (512.0) (0.0) IFELSE )` | `512.0` | `0x40800000` | `0x00000000` |  OK |
+| **Integração Final (T4)** | `( ((CONTADOR) 5 ==) (12 SAIDA) (2026 SAIDA) IFELSE )` | `12.0` | `0x40280000` | `0x00000000` |  OK |
+
+#### Análise de Precisão IEEE 754
+
+Tomando como exemplo o teste de **Lógica Condicional (T3)**, o valor decimal `512.0` é representado em hexadecimal de precisão dupla como `0x4080000000000000`. 
+1. Ao pressionar **KEY1**, o simulador exibe a Palavra Alta: `0x40800000`.
+2. Ao pressionar **KEY0**, o simulador exibe a Palavra Baixa: `0x00000000`.
+
+A coincidência bit-a-bit entre o cálculo teórico e a saída do hardware valida a implementação da FPU e a sincronização de flags via `VMRS`.
