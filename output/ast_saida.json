@@ -1,0 +1,555 @@
+{
+  "tipo": "PROGRAMA",
+  "opcode": "programa",
+  "filhos": [
+    {
+      "tipo": "INSTRUCAO_VFP",
+      "operando": "^",
+      "opcode": "POW",
+      "filhos": [
+        {
+          "tipo": "INSTRUCAO_VFP",
+          "operando": "-",
+          "opcode": "VSUB.F64",
+          "filhos": [
+            {
+              "tipo": "INSTRUCAO_VFP",
+              "operando": "*",
+              "opcode": "VMUL.F64",
+              "filhos": [
+                {
+                  "tipo": "NUMERO_LITERAL",
+                  "operando": "10.0",
+                  "opcode": "NUMERO",
+                  "filhos": []
+                },
+                {
+                  "tipo": "NUMERO_LITERAL",
+                  "operando": "5.0",
+                  "opcode": "NUMERO",
+                  "filhos": []
+                }
+              ]
+            },
+            {
+              "tipo": "INSTRUCAO_VFP",
+              "operando": "+",
+              "opcode": "VADD.F64",
+              "filhos": [
+                {
+                  "tipo": "NUMERO_LITERAL",
+                  "operando": "2",
+                  "opcode": "NUMERO",
+                  "filhos": []
+                },
+                {
+                  "tipo": "NUMERO_LITERAL",
+                  "operando": "3",
+                  "opcode": "NUMERO",
+                  "filhos": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tipo": "NUMERO_LITERAL",
+          "operando": "2.0",
+          "opcode": "NUMERO",
+          "filhos": []
+        }
+      ]
+    },
+    {
+      "tipo": "INSTRUCAO_VFP",
+      "operando": "*",
+      "opcode": "VMUL.F64",
+      "filhos": [
+        {
+          "tipo": "INSTRUCAO_VFP",
+          "operando": "|",
+          "opcode": "VDIV.F64",
+          "filhos": [
+            {
+              "tipo": "MEMORIA_RES",
+              "operando": "RES",
+              "opcode": "RES",
+              "filhos": [
+                {
+                  "tipo": "NUMERO_LITERAL",
+                  "operando": "0",
+                  "opcode": "NUMERO",
+                  "filhos": []
+                }
+              ]
+            },
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "10.5",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        },
+        {
+          "tipo": "INSTRUCAO_VFP",
+          "operando": "%",
+          "opcode": "MOD_INT",
+          "filhos": [
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "2",
+              "opcode": "NUMERO",
+              "filhos": []
+            },
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "4",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "MEMORIA_STORE",
+      "operando": "MEMORIA",
+      "opcode": "VSTR.F64",
+      "filhos": [
+        {
+          "tipo": "INSTRUCAO_VFP",
+          "operando": "+",
+          "opcode": "VADD.F64",
+          "filhos": [
+            {
+              "tipo": "INSTRUCAO_VFP",
+              "operando": "/",
+              "opcode": "DIV_INT",
+              "filhos": [
+                {
+                  "tipo": "NUMERO_LITERAL",
+                  "operando": "10",
+                  "opcode": "NUMERO",
+                  "filhos": []
+                },
+                {
+                  "tipo": "NUMERO_LITERAL",
+                  "operando": "2",
+                  "opcode": "NUMERO",
+                  "filhos": []
+                }
+              ]
+            },
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "5.0",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "COMANDO_IFELSE",
+      "operando": "IFELSE",
+      "opcode": "IFELSE",
+      "filhos": [
+        {
+          "tipo": "INSTRUCAO_CMP",
+          "operando": ">",
+          "opcode": ">",
+          "filhos": [
+            {
+              "tipo": "MEMORIA_LOAD",
+              "operando": "MEMORIA",
+              "opcode": "VLDR.F64",
+              "filhos": []
+            },
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "100",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        },
+        {
+          "tipo": "INSTRUCAO_VFP",
+          "operando": "*",
+          "opcode": "VMUL.F64",
+          "filhos": [
+            {
+              "tipo": "MEMORIA_LOAD",
+              "operando": "MEMORIA",
+              "opcode": "VLDR.F64",
+              "filhos": []
+            },
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "2",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        },
+        {
+          "tipo": "INSTRUCAO_VFP",
+          "operando": "/",
+          "opcode": "DIV_INT",
+          "filhos": [
+            {
+              "tipo": "MEMORIA_LOAD",
+              "operando": "MEMORIA",
+              "opcode": "VLDR.F64",
+              "filhos": []
+            },
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "2",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "MEMORIA_STORE",
+      "operando": "ITERADOR",
+      "opcode": "VSTR.F64",
+      "filhos": [
+        {
+          "tipo": "NUMERO_LITERAL",
+          "operando": "0",
+          "opcode": "NUMERO",
+          "filhos": []
+        }
+      ]
+    },
+    {
+      "tipo": "COMANDO_WHILE",
+      "operando": "WHILE",
+      "opcode": "WHILE",
+      "filhos": [
+        {
+          "tipo": "INSTRUCAO_CMP",
+          "operando": "!=",
+          "opcode": "!=",
+          "filhos": [
+            {
+              "tipo": "MEMORIA_LOAD",
+              "operando": "ITERADOR",
+              "opcode": "VLDR.F64",
+              "filhos": []
+            },
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "5",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        },
+        {
+          "tipo": "MEMORIA_STORE",
+          "operando": "ITERADOR",
+          "opcode": "VSTR.F64",
+          "filhos": [
+            {
+              "tipo": "INSTRUCAO_VFP",
+              "operando": "+",
+              "opcode": "VADD.F64",
+              "filhos": [
+                {
+                  "tipo": "MEMORIA_LOAD",
+                  "operando": "ITERADOR",
+                  "opcode": "VLDR.F64",
+                  "filhos": []
+                },
+                {
+                  "tipo": "NUMERO_LITERAL",
+                  "operando": "1",
+                  "opcode": "NUMERO",
+                  "filhos": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "COMANDO_IFELSE",
+      "operando": "IFELSE",
+      "opcode": "IFELSE",
+      "filhos": [
+        {
+          "tipo": "INSTRUCAO_VFP",
+          "operando": "+",
+          "opcode": "VADD.F64",
+          "filhos": [
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "10",
+              "opcode": "NUMERO",
+              "filhos": []
+            },
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "5",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        },
+        {
+          "tipo": "INSTRUCAO_VFP",
+          "operando": "-",
+          "opcode": "VSUB.F64",
+          "filhos": [
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "2",
+              "opcode": "NUMERO",
+              "filhos": []
+            },
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "1",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        },
+        {
+          "tipo": "INSTRUCAO_VFP",
+          "operando": "*",
+          "opcode": "VMUL.F64",
+          "filhos": [
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "5",
+              "opcode": "NUMERO",
+              "filhos": []
+            },
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "5",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "COMANDO_IFELSE",
+      "operando": "IFELSE",
+      "opcode": "IFELSE",
+      "filhos": [
+        {
+          "tipo": "INSTRUCAO_CMP",
+          "operando": "<=",
+          "opcode": "<=",
+          "filhos": [
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "6",
+              "opcode": "NUMERO",
+              "filhos": []
+            },
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "3",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        },
+        {
+          "tipo": "MEMORIA_RES",
+          "operando": "RES",
+          "opcode": "RES",
+          "filhos": [
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "1",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        },
+        {
+          "tipo": "MEMORIA_RES",
+          "operando": "RES",
+          "opcode": "RES",
+          "filhos": [
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "0",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "COMANDO_IFELSE",
+      "operando": "IFELSE",
+      "opcode": "IFELSE",
+      "filhos": [
+        {
+          "tipo": "INSTRUCAO_CMP",
+          "operando": ">=",
+          "opcode": ">=",
+          "filhos": [
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "20",
+              "opcode": "NUMERO",
+              "filhos": []
+            },
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "2",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        },
+        {
+          "tipo": "MEMORIA_RES",
+          "operando": "RES",
+          "opcode": "RES",
+          "filhos": [
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "1",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        },
+        {
+          "tipo": "MEMORIA_RES",
+          "operando": "RES",
+          "opcode": "RES",
+          "filhos": [
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "0",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "INSTRUCAO_VFP",
+      "operando": "+",
+      "opcode": "VADD.F64",
+      "filhos": [
+        {
+          "tipo": "INSTRUCAO_VFP",
+          "operando": "/",
+          "opcode": "DIV_INT",
+          "filhos": [
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "10",
+              "opcode": "NUMERO",
+              "filhos": []
+            },
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "3",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        },
+        {
+          "tipo": "INSTRUCAO_VFP",
+          "operando": "%",
+          "opcode": "MOD_INT",
+          "filhos": [
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "10",
+              "opcode": "NUMERO",
+              "filhos": []
+            },
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "3",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "MEMORIA_STORE",
+      "operando": "RESULTADO",
+      "opcode": "VSTR.F64",
+      "filhos": [
+        {
+          "tipo": "INSTRUCAO_VFP",
+          "operando": "^",
+          "opcode": "POW",
+          "filhos": [
+            {
+              "tipo": "INSTRUCAO_VFP",
+              "operando": "^",
+              "opcode": "POW",
+              "filhos": [
+                {
+                  "tipo": "INSTRUCAO_VFP",
+                  "operando": "^",
+                  "opcode": "POW",
+                  "filhos": [
+                    {
+                      "tipo": "NUMERO_LITERAL",
+                      "operando": "2",
+                      "opcode": "NUMERO",
+                      "filhos": []
+                    },
+                    {
+                      "tipo": "NUMERO_LITERAL",
+                      "operando": "2",
+                      "opcode": "NUMERO",
+                      "filhos": []
+                    }
+                  ]
+                },
+                {
+                  "tipo": "NUMERO_LITERAL",
+                  "operando": "2",
+                  "opcode": "NUMERO",
+                  "filhos": []
+                }
+              ]
+            },
+            {
+              "tipo": "NUMERO_LITERAL",
+              "operando": "2",
+              "opcode": "NUMERO",
+              "filhos": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "MEMORIA_LOAD",
+      "operando": "RESULTADO",
+      "opcode": "VLDR.F64",
+      "filhos": []
+    }
+  ]
+}

@@ -258,3 +258,14 @@ Tomando como exemplo o teste de **Lógica Condicional (T3)**, o valor decimal `5
 2. Ao pressionar **KEY0**, o simulador exibe a Palavra Baixa: `0x00000000`.
 
 A coincidência bit-a-bit entre o cálculo teórico e a saída do hardware valida a implementação da FPU e a sincronização de flags via `VMRS`.
+
+## Saídas da Última Execução
+
+Os artefatos gerados pela última execução do compilador (`teste2.txt`) estão organizados no diretório [`output/`](output/):
+
+| Arquivo | Descrição |
+| :--- | :--- |
+| [`output/ast_saida.json`](output/ast_saida.json) | Árvore Sintática Abstrata (AST) serializada em JSON, produzida pelo parser LL(1) a partir do arquivo de entrada mais recente. |
+| [`output/saida.s`](output/saida.s) | Código Assembly ARMv7 gerado pelo backend (`armv7_generator`), pronto para execução no simulador CPUlator-ARMv7 DEC1-SOC (v16.1). |
+
+A AST é gerada pela função `gerarArvore()` em `include/parser.hpp` e exportada via `exportarAST()` em `include/ast_exporter.hpp`. O assembly é produzido pela função `gerarAssembly()` em `include/armv7_generator.hpp`. Ambos os arquivos são sobrescritos a cada execução do programa na pasta `build/Release/` que não está ignorada pelo `.gitignore`
