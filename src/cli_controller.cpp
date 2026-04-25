@@ -32,10 +32,10 @@ void lerArquivo(std::string nomeArquivo, std::vector<std::string> &linhas)
     {
         throw std::runtime_error("O arquivo carregado esta vazio\n");
     }
-    else if (linhas.size() < 10)
-    {
-        throw std::runtime_error("O arquivo carregado possui menos de 10 linhas. Linhas carregadas: " + std::to_string(linhas.size()));
-    }
+    // else if (linhas.size() < 10)
+    // {
+    //     throw std::runtime_error("O arquivo carregado possui menos de 10 linhas. Linhas carregadas: " + std::to_string(linhas.size()));
+    // }
     else
     {
         std::cout << "Sucesso " << linhas.size() << " linhas carregadas.\n";

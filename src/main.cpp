@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
     }
     catch (std::exception &e)
     {
-        cerr << "Falha ao ler arquivo de tokens" << endl;
+        cerr << "Falha ao ler arquivo de tokens" << e.what() << "\n";
         return 1;
     }
 
