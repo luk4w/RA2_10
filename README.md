@@ -268,4 +268,4 @@ Os artefatos gerados pela última execução do compilador (`teste2.txt`) estão
 | [`output/ast_saida.json`](output/ast_saida.json) | Árvore Sintática Abstrata (AST) serializada em JSON, produzida pelo parser LL(1) a partir do arquivo de entrada mais recente. |
 | [`output/saida.s`](output/saida.s) | Código Assembly ARMv7 gerado pelo backend (`armv7_generator`), pronto para execução no simulador CPUlator-ARMv7 DEC1-SOC (v16.1). |
 
-A AST é gerada pela função `gerarArvore()` em `include/parser.hpp` e exportada via `exportarAST()` em `include/ast_exporter.hpp`. O assembly é produzido pela função `gerarAssembly()` em `include/armv7_generator.hpp`. Ambos os arquivos são sobrescritos a cada execução do programa na pasta `build/Release/` que não está ignorada pelo `.gitignore`
+A AST é gerada pela função `gerarArvore()` em `include/parser.hpp` e exportada via `exportarAST()` em `include/ast_exporter.hpp`. O assembly é produzido pela função `gerarAssembly()` em `include/armv7_generator.hpp`. Ambos os arquivos são sobrescritos a cada execução do programa na pasta `build/Release/` que está ignorada pelo `.gitignore`
