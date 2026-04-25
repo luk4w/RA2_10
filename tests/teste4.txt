@@ -11,4 +11,8 @@
 ( ( 10 3 / ) ( 10 3 % ) + )
 ( ( ( ( 2 2 ^ ) 2 ^ ) 2 ^ ) RESULTADO )
 ( RESULTADO )
+( 0 CONTADOR )
+( ( (CONTADOR) 5 < ) ( ( (CONTADOR) 1 + ) CONTADOR ) WHILE )
+( ( (CONTADOR) 5 == ) ( 12 SAIDA ) ( 2026 SAIDA ) IFELSE )
+( SAIDA )
 (END)
