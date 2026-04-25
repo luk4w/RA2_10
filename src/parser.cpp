@@ -291,16 +291,20 @@ Derivacao parsear(const vector<TokenData> &tokens,
                     valorReal + "'");
         }
 
-        bool ehNaoTerminal = (tabela_ll1.find(topo) != tabela_ll1.end());
+        bool isNaoTerminal = (tabela_ll1.find(topo) != tabela_ll1.end());
 
-        if (!ehNaoTerminal)
+        if (!isNaoTerminal)
         {
             // Terminal: verifica match e executa acao semantica
             if (topo != terminalAtual)
+            {
+                int linhaErro = (indexToken < tokens.size()) ? tokens[indexToken].linha : tokens.back().linha;
                 throw runtime_error(
-                    "Erro de sintaxe: esperado '" + topo +
+                    "Erro de sintaxe na linha " + to_string(linhaErro) +
+                    ": esperado '" + topo +
                     "', encontrado '" + terminalAtual +
                     "' (valor: '" + valorReal + "')");
+            }
 
             // acoesa semantica por tipo de terminal
             if (topo == "PARENTESE_ESQ")
@@ -377,10 +381,14 @@ Derivacao parsear(const vector<TokenData> &tokens,
             auto &linhaTabela = tabela_ll1.at(topo);
 
             if (linhaTabela.find(terminalAtual) == linhaTabela.end())
+            {
+                int linhaErro = (indexToken < tokens.size()) ? tokens[indexToken].linha : tokens.back().linha;
                 throw runtime_error(
-                    "Erro de sintaxe: nenhuma regra em M[" + topo +
+                    "Erro de sintaxe na linha " + to_string(linhaErro) +
+                    ": nenhuma regra em M[" + topo +
                     "][" + terminalAtual +
                     "] para o token '" + valorReal + "'");
+            }
 
             const vector<string> &producao = linhaTabela.at(terminalAtual);
 

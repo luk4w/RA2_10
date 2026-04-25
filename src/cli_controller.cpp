@@ -45,26 +45,33 @@ void lerArquivo(std::string nomeArquivo, std::vector<std::string> &linhas)
 std::vector<TokenData> lerTokens(std::string nomeArquivo)
 {
     std::ifstream arquivo(nomeArquivo);
-    // Verificar se o arquivo foi aberto com sucesso
     if (!arquivo.is_open())
     {
         throw std::runtime_error("Nao foi possivel abrir o arquivo: " + nomeArquivo);
     }
 
-
     std::vector<TokenData> tokens_estruturados;
-    std::string linha;
+    std::string linhaLida;
 
-    // Extrair o tipo e o valor do token e transformar num vetor estruturado
-    while (std::getline(arquivo, linha))
+    while (std::getline(arquivo, linhaLida))
     {
-        if (linha.empty()) continue;
+        if (linhaLida.empty())
+            continue;
 
-        // splitToken retorna std::pair<std::string, std::string> 
-        auto [tipo, valor] = splitToken(linha); 
-        
-        tokens_estruturados.push_back({tipo, valor});
+        // Encontra as posições das vírgulas para separar TIPO, LINHA e VALOR
+        size_t pos1 = linhaLida.find(',');
+        size_t pos2 = linhaLida.find(',', pos1 + 1);
+
+        if (pos1 != std::string::npos && pos2 != std::string::npos)
+        {
+            TokenData td;
+            td.tipo = linhaLida.substr(0, pos1);
+            td.linha = std::stoi(linhaLida.substr(pos1 + 1, pos2 - pos1 - 1));
+            td.valor = linhaLida.substr(pos2 + 1);
+
+            tokens_estruturados.push_back(td);
+        }
     }
 
     return tokens_estruturados;
-};
+}

@@ -4,12 +4,12 @@
 #include <string>
 
 // Protótipos de funções
-void estadoInicial(const std::string &linha, size_t &pos, std::vector<std::string> &tokens,int numeroLinha);
-void estadoNumero(const std::string &linha, size_t &pos, std::vector<std::string> &tokens,int numeroLinha);
-void estadoOperador(const std::string &linha, size_t &pos, std::vector<std::string> &tokens,int numeroLinha);
-void estadoIdentificador(const std::string &linha, size_t &pos, std::vector<std::string> &tokens,int numeroLinha);
-void estadoParentese(const std::string &linha, size_t &pos, std::vector<std::string> &tokens,int numeroLinha);
-void estadoVazio(const std::string &linha, size_t &pos, std::vector<std::string> &tokens,int numeroLinha);
+void estadoInicial(const std::string &linha, size_t &pos, std::vector<std::string> &tokens, int numeroLinha);
+void estadoNumero(const std::string &linha, size_t &pos, std::vector<std::string> &tokens, int numeroLinha);
+void estadoOperador(const std::string &linha, size_t &pos, std::vector<std::string> &tokens, int numeroLinha);
+void estadoIdentificador(const std::string &linha, size_t &pos, std::vector<std::string> &tokens, int numeroLinha);
+void estadoParentese(const std::string &linha, size_t &pos, std::vector<std::string> &tokens, int numeroLinha);
+void estadoVazio(const std::string &linha, size_t &pos, std::vector<std::string> &tokens, int numeroLinha);
 
 void parseExpressao(std::string linha, std::vector<std::string> &tokens, int numeroLinha)
 {
@@ -97,7 +97,7 @@ void estadoNumero(const std::string &linha, size_t &pos, std::vector<std::string
         }
     }
 
-    tokens.push_back(std::to_string(static_cast<int>(TipoToken::NUMERO)) + "," + buffer);
+    tokens.push_back(std::to_string(static_cast<int>(TipoToken::NUMERO)) + "," + std::to_string(numeroLinha) + "," + buffer);
     return;
 }
 
@@ -111,7 +111,7 @@ void estadoOperador(const std::string &linha, size_t &pos, std::vector<std::stri
         std::string op2 = linha.substr(pos, 2);
         if (op2 == "==" || op2 == "!=" || op2 == "<=" || op2 == ">=")
         {
-            tokens.push_back(std::to_string(static_cast<int>(TipoToken::OPERADOR_RELACIONAL)) + "," + op2);
+            tokens.push_back(std::to_string(static_cast<int>(TipoToken::OPERADOR_RELACIONAL)) + "," + std::to_string(numeroLinha) + "," + op2);
             pos += 2;
             return;
         }
@@ -120,7 +120,7 @@ void estadoOperador(const std::string &linha, size_t &pos, std::vector<std::stri
     // Tenta casar os Operadores Relacionais de 1 caractere (<, >)
     if (c == '<' || c == '>')
     {
-        tokens.push_back(std::to_string(static_cast<int>(TipoToken::OPERADOR_RELACIONAL)) + "," + std::string(1, c));
+        tokens.push_back(std::to_string(static_cast<int>(TipoToken::OPERADOR_RELACIONAL)) + "," + std::to_string(numeroLinha) + "," + std::string(1, c));
         pos++;
         return;
     }
@@ -163,7 +163,7 @@ void estadoOperador(const std::string &linha, size_t &pos, std::vector<std::stri
             }
         }
 
-        tokens.push_back(std::to_string(static_cast<int>(TipoToken::OPERADOR)) + "," + std::string(1, c));
+        tokens.push_back(std::to_string(static_cast<int>(TipoToken::OPERADOR)) + "," + std::to_string(numeroLinha) + "," + std::string(1, c));
         pos++;
         return; // Sucesso
     }
@@ -213,7 +213,18 @@ void estadoIdentificador(const std::string &linha, size_t &pos, std::vector<std:
         if (is_operando_anterior && !isPalavraReservada(buffer))
         {
             // Unica excecao: atribuicao (NUMERO IDENTIFICADOR) ou acesso (NUMERO RES)
-            if (tokens.size() < 2 || tokens[tokens.size() - 2] != std::to_string(static_cast<int>(TipoToken::PARENTESE_ESQ)) + ",(")
+            bool is_atribuicao = false;
+            if (tokens.size() >= 1)
+            {
+                std::string ultimo = tokens.back();
+                // Se o último foi um NUMERO e estamos dentro de um parêntese, é uma atribuição válida
+                if (ultimo.rfind(std::to_string(static_cast<int>(TipoToken::NUMERO)) + ",", 0) == 0)
+                {
+                    is_atribuicao = true;
+                }
+            }
+
+            if (!is_atribuicao)
             {
                 throw std::runtime_error("Erro na linha " + std::to_string(numeroLinha) + " '" + buffer + "' inesperado apos '" + ultimo_token + "' na posicao " + std::to_string(pos - buffer.length()) + "\n");
             }
@@ -224,9 +235,9 @@ void estadoIdentificador(const std::string &linha, size_t &pos, std::vector<std:
     {
         // Verificar se é palavra reservada ou identificador comum
         if (isPalavraReservada(buffer))
-            tokens.push_back(std::to_string(static_cast<int>(TipoToken::PALAVRA_RESERVADA)) + "," + buffer);
+            tokens.push_back(std::to_string(static_cast<int>(TipoToken::PALAVRA_RESERVADA)) + "," + std::to_string(numeroLinha) + "," + buffer);
         else
-            tokens.push_back(std::to_string(static_cast<int>(TipoToken::IDENTIFICADOR)) + "," + buffer);
+            tokens.push_back(std::to_string(static_cast<int>(TipoToken::IDENTIFICADOR)) + "," + std::to_string(numeroLinha) + "," + buffer);
     }
 
     return;
@@ -238,11 +249,11 @@ void estadoParentese(const std::string &linha, size_t &pos, std::vector<std::str
     p += linha[pos];
     if (p == "(")
     {
-        tokens.push_back(std::to_string(static_cast<int>(TipoToken::PARENTESE_ESQ)) + ",(");
+        tokens.push_back(std::to_string(static_cast<int>(TipoToken::PARENTESE_ESQ)) + "," + std::to_string(numeroLinha) + ",(");
     }
     else
     {
-        tokens.push_back(std::to_string(static_cast<int>(TipoToken::PARENTESE_DIR)) + ",)");
+        tokens.push_back(std::to_string(static_cast<int>(TipoToken::PARENTESE_DIR)) + "," + std::to_string(numeroLinha) + ",)");
     }
     pos++;
     return;

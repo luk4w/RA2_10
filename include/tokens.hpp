@@ -39,13 +39,3 @@ inline bool isPalavraReservada(const std::string &s)
 {
     return PALAVRAS_RESERVADAS.count(s) > 0;
 }
-
-inline std::pair<std::string, std::string> splitToken(const std::string &token)
-{
-    size_t comma_pos = token.find(',');
-    if (comma_pos == std::string::npos)
-        return {"", token};
-    std::string tipo = token.substr(0, comma_pos);
-    std::string valor = token.substr(comma_pos + 1);
-    return {tipo, valor};
-}
