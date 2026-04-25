@@ -55,6 +55,23 @@ static bool produzValor(ASTNodeType tipo)
     }
 }
 
+static std::string mapearBranchInverso(std::string op)
+{
+    if (op == "==")
+        return "BNE"; // Salta se não for igual
+    if (op == "!=")
+        return "BEQ"; // Salta se for igual
+    if (op == "<")
+        return "BGE"; // Salta se maior ou igual
+    if (op == "<=")
+        return "BGT"; // Salta se maior que
+    if (op == ">")
+        return "BLE"; // Salta se menor ou igual
+    if (op == ">=")
+        return "BLT"; // Salta se menor que
+    return "B";       // Fallback de segurança
+}
+
 // Walker recursivo pos-ordem: emite o Assembly para o subarvore raiz em no
 // Invariante: ao retornar, nos que "produzem valor" deixam 1 double na pilha FPU (via VPUSH.F64)
 // Nos de efeito colateral (STORE) consomem e nao deixam residuo
@@ -222,11 +239,59 @@ static void emitirNo(
         {
             emitirNo(node->filhos[0], ss, literais, variaveis, contadorLabel);
             emitirNo(node->filhos[1], ss, literais, variaveis, contadorLabel);
+            ss << "    @ Comparacao FPU\n";
+            ss << "    VPOP.F64 {D1}           @ Operando B\n";
+            ss << "    VPOP.F64 {D0}           @ Operando A\n";
+            ss << "    VCMP.F64 D0, D1         @ Compara A com B\n";
+            ss << "    VMRS APSR_nzcv, FPSCR   @ Transfere Flags da FPU para o processador\n\n";
         }
         break;
 
     case ASTNodeType::COMANDO_IFELSE:
+    {
+        int id = contadorLabel++;
+        std::string opRelacional = node->filhos[0]->opcode;
+        std::string branchSair = mapearBranchInverso(opRelacional);
+
+        // 1. Emite a condição e seta os flags (VCMP + VMRS)
+        emitirNo(node->filhos[0], ss, literais, variaveis, contadorLabel);
+
+        // 2. Salta para o ELSE se a condição for FALSA
+        ss << "    " << branchSair << " else_label_" << id << "\n";
+
+        // 3. Bloco THEN
+        emitirNo(node->filhos[1], ss, literais, variaveis, contadorLabel);
+        ss << "    B end_if_" << id << "\n";
+
+        ss << "else_label_" << id << ":\n";
+        if (node->filhos.size() > 2)
+            emitirNo(node->filhos[2], ss, literais, variaveis, contadorLabel);
+
+        ss << "end_if_" << id << ":\n\n";
+        break;
+    }
     case ASTNodeType::COMANDO_WHILE:
+    {
+        int id = contadorLabel++;
+        std::string opRelacional = node->filhos[0]->opcode;
+        std::string branchSair = mapearBranchInverso(opRelacional);
+
+        ss << "while_start_" << id << ":\n";
+
+        // 1. Emite a condição e seta os flags
+        emitirNo(node->filhos[0], ss, literais, variaveis, contadorLabel);
+
+        // 2. Salta para o FIM se a condição for FALSA
+        ss << "    " << branchSair << " while_end_" << id << "\n";
+
+        // 3. Corpo do laço
+        emitirNo(node->filhos[1], ss, literais, variaveis, contadorLabel);
+
+        // 4. Retorno ao início
+        ss << "    B while_start_" << id << "\n";
+        ss << "while_end_" << id << ":\n\n";
+        break;
+    }
     case ASTNodeType::SEQUENCIA:
         // logica de controle de emissao completa com labels proprios (contadorLabel reservado)
         // Na aritmetica funcional apenas emite os filhos para preservar efeitos (STORE/RES)
@@ -235,7 +300,6 @@ static void emitirNo(
         break;
     }
 }
-
 
 // recebe a raiz da AST e emite Assembly ARMv7 VFP
 void gerarAssembly(ASTNode *arvore, std::string &codigoAssembly)
