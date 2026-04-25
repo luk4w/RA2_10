@@ -34,6 +34,8 @@ int main(int argc, char *argv[])
     }
     cout << "\n\n";
 
+    executarTestesSintaticos();
+
     // Validacao do numero de argumentos
     if (argc != 2)
     {
