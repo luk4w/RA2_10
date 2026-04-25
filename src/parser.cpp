@@ -1,8 +1,3 @@
-// Integrantes do grupo (ordem alfabetica):
-// Lucas Franco de Mello - luk4w
-//
-// Nome do grupo no Canvas: RA2 10
-
 #include "parser.hpp"
 #include <iostream>
 #include <stdexcept>
