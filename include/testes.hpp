@@ -16,9 +16,9 @@ inline void testeNumeros() {
     std::vector<std::string> tokens;
     parseExpressao("10.5 42", tokens, 1);
     
-    assert(tokens.size() == 2); 
-    // OBS: Ajuste a string abaixo para bater exatamente com o formato que o seu Lexico cospe
-    assert(tokens[0] == "0,10.5"); 
+    assert(tokens.size() == 2);
+    // Formato do scanner: "tipo,linha,valor" -> NUMERO(0), linha 1, valor 10.5
+    assert(tokens[0] == "0,1,10.5");
     
     std::cout << "  -> [OK] Teste de Numeros\n";
 }
@@ -28,8 +28,8 @@ inline void testeOperadores() {
     parseExpressao("+ | /", tokens, 1);
     
     assert(tokens.size() == 3);
-    assert(tokens[1] == "2,|");
-    assert(tokens[2] == "2,/");
+    assert(tokens[1] == "2,1,|");
+    assert(tokens[2] == "2,1,/");
     
     std::cout << "  -> [OK] Teste de Operadores\n";
 }
